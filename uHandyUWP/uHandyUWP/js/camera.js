@@ -6,7 +6,7 @@
     this.DisplayOrientations = Windows.Graphics.Display.DisplayOrientations;
     this.Imaging = Windows.Graphics.Imaging;
     this.Media = Windows.Media;
-
+    //this.previewFrameImage.src = null; 
     // 收到關於介面或裝置的旋轉通知，並作對應的動作。
     this.oDisplayInformation = Windows.Graphics.Display.DisplayInformation.getForCurrentView();
     this.oDisplayOrientation = this.DisplayOrientations.portrait;
@@ -29,18 +29,18 @@
     // 旋轉的原始資料，以便應用於串流(MF_MT_VIDEO_ROTATION)
     // 參考連結: http://msdn.microsoft.com/en-us/library/windows/apps/xaml/hh868174.aspx
     this.RotationKey = "C380465D-2271-428C-9B83-ECEA3B4A85C1";
-}
+};
 
 MyCamera.prototype.initState = function () {
-    //previewFrameImage.src = null;
-}
+    this.previewFrameImage.src = null;
+};
 
 MyCamera.prototype.activeCamera = function () {
     //this.oDisplayInformation.addEventListener("orientationchanged", displayInformation_orientationChanged);
     this.initializeCameraAsync();
-}
+};
 
-MyCamera.prototype.initializeCameraAsync = function() {
+MyCamera.prototype.initializeCameraAsync = function () {
     console.log("InitializeCameraAsync");
 
     // 取得可用的照相裝置
@@ -103,9 +103,9 @@ MyCamera.prototype.initializeCameraAsync = function() {
     }).done();
 
 
-}
+};
 
-MyCamera.prototype.findCameraDeviceByPanelAsync = function(panel) {
+MyCamera.prototype.findCameraDeviceByPanelAsync = function (panel) {
     var deviceInfo = null;
     // 尋找可以用的照相裝置
     return this.DeviceInformation.findAllAsync(this.DeviceClass.videoCapture)
@@ -124,4 +124,4 @@ MyCamera.prototype.findCameraDeviceByPanelAsync = function(panel) {
 
         return deviceInfo;
     });
-}
+};
