@@ -1,11 +1,15 @@
 ﻿body {
 }
 
-#cameraPreview{
+#cameraView{
     position:relative;
     background-color:red;
     width:100%;
     height:80%;
+}
+#cameraPreview {
+    width:100%;
+    height:auto;
 }
 
 #sideBar{
