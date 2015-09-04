@@ -11,10 +11,7 @@
 		if (args.detail.kind === activation.ActivationKind.launch) {
 			if (args.detail.previousExecutionState !== activation.ApplicationExecutionState.terminated) {
 			    // 此應用程式已全新啟動。請在這裡初始化應用程式。
-			    oMyCamera.initState();
-			    console.log("TEST CONSOLE");
 			}
-			oMyCamera.activeCamera();
 			args.setPromise(WinJS.UI.processAll());
 
 		} else {

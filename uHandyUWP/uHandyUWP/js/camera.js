@@ -62,12 +62,12 @@ MyCamera.prototype.initializeCameraAsync = function() {
             this.mirroringPreview = (camera.enclosureLocation.panel === Windows.Devices.Enumeration.Panel.front);
         }
 
-        this.oMediaCapture = new Capture.MediaCapture();
+        this.oMediaCapture = new Windows.Media.Capture.MediaCapture();
 
         // 監聽「當無法捕捉畫面時」的事件
-        this.oMediaCapture.addEventListener("failed", mediaCapture_failed);
+        this.oMediaCapture.addEventListener("failed", Windows.Media.Capture.mediaCapture_failed);
 
-        var settings = new Capture.MediaCaptureInitializationSettings();
+        var settings = new Windows.Media.Capture.MediaCaptureInitializationSettings();
         settings.videoDeviceId = camera.id;
 
         // 初始化並開始顯示畫面
