@@ -18,8 +18,22 @@
     position:relative;
     height:100%;
     width:9.091%;
-    
+    float:left;
+    text-align:center;
+    line-height:50%;
+
 }
+.myicon > .fa ::before {
+    content:'';
+    display: inline-block;
+    vertical-align: middle ;
+    height: 100%;
+}
+.iconCenter{
+    vertical-align:middle;
+    background-color:aliceblue;
+}
+
 .fillIn{
     background-color:yellow;
 }
