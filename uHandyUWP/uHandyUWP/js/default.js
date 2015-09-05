@@ -160,15 +160,18 @@
 	    if (mirroringPreview) {
 	        cameraPreview.style.transform = "scale(-1, 1)";
 	    }
-
-	    var previewUrl = URL.createObjectURL(oMediaCapture);
-	    previewVidTag.src = previewUrl;
-	    previewVidTag.play();
-
-	    previewVidTag.addEventListener("playing", function () {
-	        isPreviewing = true;
-	        setPreviewRotationAsync();
-	    });
+	    try{
+	        var previewUrl = URL.createObjectURL(oMediaCapture)
+	        previewVidTag.src = previewUrl;
+	        previewVidTag.play();
+	    
+	        previewVidTag.addEventListener("playing", function () {
+	            isPreviewing = true;
+	            setPreviewRotationAsync();
+	        });
+	    } catch (e) {
+	        console.log(e.message);
+	    }
 	}
 
     /// <summary>

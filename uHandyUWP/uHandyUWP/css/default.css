@@ -1,12 +1,14 @@
 ﻿body {
 }
 
-#cameraView{
-    position:relative;
+#cameraDiv{
+    box-sizing: border-box;
     background-color:red;
     width:100%;
-    height:80%;
+    height:100%;
+    padding-bottom:100px;
 }
+
 #cameraPreview {
     width:100%;
     height:auto;
@@ -16,7 +18,7 @@
     position:relative;
     background-color:green;
     width:100%;
-    height:20%;
+    height:100px;
 }
 .myicon{
     position:relative;
