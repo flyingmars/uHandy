@@ -6,7 +6,7 @@
     background-color:red;
     width:100%;
     height:100%;
-    padding-bottom:100px;
+    margin-bottom:-100px;
 }
 
 #cameraPreview {
@@ -26,15 +26,9 @@
     width:9.091%;
     float:left;
     text-align:center;
-    line-height:50%;
+    line-height:100px;
+}
 
-}
-.myicon > .fa ::before {
-    content:'';
-    display: inline-block;
-    vertical-align: middle ;
-    height: 100%;
-}
 .iconCenter{
     vertical-align:middle;
     background-color:aliceblue;
