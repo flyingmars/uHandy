@@ -22,7 +22,9 @@
     // MediaCapture and its state variables
 	var oMediaCapture = null,
         isInitialized = false,
-        isPreviewing = false;
+        isPreviewing = false,
+        isRecording = false ;
+
 
     // Information about the camera device
 	var externalCamera = false,
@@ -45,7 +47,7 @@
 			oDisplayInformation.addEventListener("orientationchanged", displayInformation_orientationChanged);
 			initializeCameraAsync();
 			args.setPromise(WinJS.UI.processAll());
-
+            
 		} else {
 		    // 此應用程式已被暫停並終止。
 		    // 若要建立流暢的使用者體驗，請在此還原應用程式狀態，以便讓應用程式看起來像是從未停止執行一樣。
@@ -373,16 +375,43 @@
 	    if (!isPreviewing) {
 	        return;
 	    }
-
 	    getPreviewFrameAsSoftwareBitmapAsync().done();
-        /*
-	    if (saveShowFrameCheckBox.checked === true) {
-	        getPreviewFrameAsSoftwareBitmapAsync().done();
+	}
+
+	function getRecord_tapped() {
+	    var promiseToExecute = null;
+	    if (!isRecording) {
+	        promiseToExecute = startRecordingAsync();
 	    }
 	    else {
-	        getPreviewFrameAsD3DSurfaceAsync().done();
-	    }*/
+	        promiseToExecute = stopRecordingAsync();
+	    }
+
+	    promiseToExecute
+        .then(function () {
+            updateCaptureControls();
+        }, function (error) {
+            console.log(error.message);
+        }).done();
 	}
+
+	function startRecordingAsync() {
+	    return Windows.Storage.KnownFolders.picturesLibrary.createFileAsync("SimpleVideo.mp4", Windows.Storage.CreationCollisionOption.generateUniqueName)
+        .then(function (file) {
+            // Calculate rotation angle, taking mirroring into account if necessary
+            var rotationAngle = 360 - convertDeviceOrientationToDegrees(getCameraOrientation());
+            var encodingProfile = Windows.Media.MediaProperties.MediaEncodingProfile.createMp4(Windows.Media.MediaProperties.VideoEncodingQuality.auto);
+            encodingProfile.video.properties.insert(RotationKey, rotationAngle);
+
+            console.log("Starting recording...");
+            return oMediaCapture.startRecordToStorageFileAsync(encodingProfile, file)
+            .then(function () {
+                isRecording = true;
+                console.log("Started recording!");
+            });
+        });
+	}
+
 
     /// <summary>
     /// In the event of the app being minimized this method handles media property change events. If the app receives a mute
