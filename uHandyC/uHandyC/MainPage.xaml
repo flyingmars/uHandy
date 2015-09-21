@@ -8,6 +8,11 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <CaptureElement x:Name="PreviewControl" HorizontalAlignment="Left" Height="606" VerticalAlignment="Top" Width="1280"/>
+        <Button x:Name="PhotoButton" Content="Button" HorizontalAlignment="Center" Margin="0,611,1177,0" VerticalAlignment="Center" Height="109" Width="103" Click="button_Click"/>
+        <Button x:Name="VideoButton" Content="Button" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="119" Margin="0,0,1177,0"/>
+        <Button x:Name="StartRecordingIcon" Content="Button" HorizontalAlignment="Left" Margin="1175,606,-4,0" VerticalAlignment="Top" Height="114" Width="109"/>
+        <Button x:Name="StopRecordingIcon" Content="Button" HorizontalAlignment="Left" Margin="1175,0,0,0" VerticalAlignment="Top" Height="119" Width="105"/>
 
     </Grid>
 </Page>

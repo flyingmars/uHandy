@@ -14,20 +14,31 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using System.Threading.Tasks;         // Used to implement asynchronous methods
+using Windows.Devices.Enumeration;    // Used to enumerate cameras on the device
+using Windows.Devices.Sensors;        // Orientation sensor is used to rotate the camera preview
+using Windows.Graphics.Display;       // Used to determine the display orientation
+using Windows.Graphics.Imaging;       // Used for encoding captured images
+using Windows.Media;                  // Provides SystemMediaTransportControls
+using Windows.Media.Capture;          // MediaCapture APIs
+using Windows.Media.MediaProperties;  // Used for photo and video encoding
+using Windows.Storage;                // General file I/O
+using Windows.Storage.FileProperties; // Used for image file encoding
+using Windows.Storage.Streams;        // General file I/O
+using Windows.System.Display;         // Used to keep the screen awake during preview and capture
+using Windows.UI.Core;                // Used for updating UI from within async operations
 
-namespace uHandyC
-{
+namespace uHandyC {
     /// <summary>
     /// 提供應用程式專屬行為以補充預設的應用程式類別。
     /// </summary>
-    sealed partial class App : Application
-    {
+    sealed partial class App : Application {
+    
         /// <summary>
         /// 初始化單一應用程式物件。這是第一行執行之撰寫程式碼，
         /// 而且其邏輯相當於 main() 或 WinMain()。
         /// </summary>
-        public App()
-        {
+        public App() {
             Microsoft.ApplicationInsights.WindowsAppInitializer.InitializeAsync(
                 Microsoft.ApplicationInsights.WindowsCollectors.Metadata |
                 Microsoft.ApplicationInsights.WindowsCollectors.Session);
@@ -40,12 +51,10 @@ namespace uHandyC
         /// 將在例如啟動應用程式時使用以開啟特定檔案。
         /// </summary>
         /// <param name="e">關於啟動要求和處理序的詳細資料。</param>
-        protected override void OnLaunched(LaunchActivatedEventArgs e)
-        {
+        protected override void OnLaunched(LaunchActivatedEventArgs e) {
 
 #if DEBUG
-            if (System.Diagnostics.Debugger.IsAttached)
-            {
+            if (System.Diagnostics.Debugger.IsAttached) {
                 this.DebugSettings.EnableFrameRateCounter = true;
             }
 #endif
@@ -54,15 +63,13 @@ namespace uHandyC
 
             // 當視窗中已有內容時，不重複應用程式初始化，
             // 只確定視窗是作用中
-            if (rootFrame == null)
-            {
+            if (rootFrame == null) {
                 // 建立框架做為巡覽內容，並巡覽至第一頁
                 rootFrame = new Frame();
 
                 rootFrame.NavigationFailed += OnNavigationFailed;
 
-                if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
-                {
+                if (e.PreviousExecutionState == ApplicationExecutionState.Terminated) {
                     //TODO: 從之前暫停的應用程式載入狀態
                 }
 
@@ -70,8 +77,7 @@ namespace uHandyC
                 Window.Current.Content = rootFrame;
             }
 
-            if (rootFrame.Content == null)
-            {
+            if (rootFrame.Content == null) {
                 // 在巡覽堆疊未還原時，巡覽至第一頁，
                 // 設定新的頁面，方式是透過傳遞必要資訊做為巡覽
                 // 參數
@@ -86,8 +92,7 @@ namespace uHandyC
         /// </summary>
         /// <param name="sender">導致巡覽失敗的框架</param>
         /// <param name="e">有關巡覽失敗的詳細資料</param>
-        void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
-        {
+        void OnNavigationFailed(object sender, NavigationFailedEventArgs e) {
             throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
         }
 
@@ -98,8 +103,7 @@ namespace uHandyC
         /// </summary>
         /// <param name="sender">暫停之要求的來源。</param>
         /// <param name="e">有關暫停之要求的詳細資料。</param>
-        private void OnSuspending(object sender, SuspendingEventArgs e)
-        {
+        private void OnSuspending(object sender, SuspendingEventArgs e) {
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: 儲存應用程式狀態，並停止任何背景活動
             deferral.Complete();
