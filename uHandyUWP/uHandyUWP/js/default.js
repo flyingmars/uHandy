@@ -42,6 +42,7 @@
 			if (args.detail.previousExecutionState !== activation.ApplicationExecutionState.terminated) {
 			    // 此應用程式已全新啟動。請在這裡初始化應用程式。
 			    document.getElementById("getPreviewFrameButton").addEventListener("click", getPreviewFrameButton_tapped);
+			    document.getElementById("zoomTestButton").addEventListener("click", getZoomButtonClick);
 			    previewFrameImage.src = null;
 			}
 			oDisplayInformation.addEventListener("orientationchanged", displayInformation_orientationChanged);
@@ -67,7 +68,6 @@
 	app.onunload = function (args) {
 	    oDisplayInformation.removeEventListener("orientationchanged", displayInformation_orientationChanged);
 	    document.getElementById("getPreviewFrameButton").removeEventListener("click", getPreviewFrameButton_tapped);
-	    document.getElementById("zoomTestButton").removeEventListener("click", getZoomButtonClick);
 	    oSystemMediaControls.removeEventListener("propertychanged", systemMediaControls_PropertyChanged);
 
 	    args.setPromise(cleanupCameraAsync());
