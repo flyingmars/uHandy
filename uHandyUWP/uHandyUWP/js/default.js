@@ -79,13 +79,19 @@
 	    var zoomValueMax = null;
 	    var zoomValueMin = null;
 	    var zoomValueNow = null;
-
+	    var zoomValueStep = null;
+        var zoomSet = new Windows.Media.Devices.ZoomSettings();
 	    if (isInitialized) {
 	        if (isPreviewing) {
-	            zoomValueNow = videoDev.zoom.tryGetValue() ;
+	            zoomValueNow = videoDev.zoom.tryGetValue();
+	            zoomValueStep = videoDev.zoom.capabilities.step;
 	            zoomValueMin = videoDev.zoom.capabilities.min ;
-	            zoomValueMax = videoDev.zoom.capabilities.max ;
-	            videoDev.zoom.trySetValue( zoomValueNow + 20 );
+	            zoomValueMax = videoDev.zoom.capabilities.max;
+	            console.log(videoDev.zoomControl.supported);
+
+	            zoomSet.Mode = Windows.Media.Devices.ZoomTransitionMode.Auto;
+	            zoomSet.Value = zoomValueNow + zoomValueStep;
+	            //videoDev.zoomControl.configure(zoomSet);
 	        }
 	    }
 	}
