@@ -85,7 +85,7 @@
 	            zoomValueNow = videoDev.zoom.tryGetValue() ;
 	            zoomValueMin = videoDev.zoom.capabilities.min ;
 	            zoomValueMax = videoDev.zoom.capabilities.max ;
-	            videoDev.setDeviceProperty(videoDev.zoom, zoomValueNow + 20);
+	            videoDev.zoom.trySetValue( zoomValueNow + 20 );
 	        }
 	    }
 	}
