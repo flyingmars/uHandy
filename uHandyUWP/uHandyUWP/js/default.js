@@ -67,6 +67,7 @@
 	app.onunload = function (args) {
 	    oDisplayInformation.removeEventListener("orientationchanged", displayInformation_orientationChanged);
 	    document.getElementById("getPreviewFrameButton").removeEventListener("click", getPreviewFrameButton_tapped);
+	    document.getElementById("zoomTestButton").removeEventListener("click", getZoomButtonClick);
 	    oSystemMediaControls.removeEventListener("propertychanged", systemMediaControls_PropertyChanged);
 
 	    args.setPromise(cleanupCameraAsync());
