@@ -76,12 +76,16 @@
 	function getZoomButtonClick() {
 	    console.log("getZoomButtonClick");
 	    var videoDev = oMediaCapture.videoDeviceController ;
-	    var zoomValue = null ;
+	    var zoomValueMax = null;
+	    var zoomValueMin = null;
+	    var zoomValueNow = null;
+
 	    if (isInitialized) {
 	        if (isPreviewing) {
-	            console.log(videoDev.zoom.capabilities.min);
-	            console.log(videoDev.zoom.capabilities.max);
-	            
+	            zoomValueNow = videoDev.zoom.tryGetValue() ;
+	            zoomValueMin = videoDev.zoom.capabilities.min ;
+	            zoomValueMax = videoDev.zoom.capabilities.max ;
+	            videoDev.setDeviceProperty(videoDev.zoom, zoomValueNow + 20);
 	        }
 	    }
 	}
