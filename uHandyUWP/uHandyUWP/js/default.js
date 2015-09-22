@@ -71,6 +71,20 @@
 
 	    args.setPromise(cleanupCameraAsync());
 	};
+
+	function getZoomButtonClick() {
+	    console.log("getZoomButtonClick");
+	    var videoDev = oMediaCapture.videoDeviceController ;
+	    var zoomValue = null ;
+	    if (isInitialized) {
+	        if (isPreviewing) {
+	            console.log(videoDev.zoom.capabilities.min);
+	            console.log(videoDev.zoom.capabilities.max);
+	            
+	        }
+	    }
+	}
+
     /// <summary>
     /// Initializes the MediaCapture, registers events, gets camera device information for mirroring and rotating, starts preview and unlocks the UI
     /// </summary>
