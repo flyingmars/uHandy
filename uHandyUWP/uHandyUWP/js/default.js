@@ -9,29 +9,28 @@
 	var Imaging = Windows.Graphics.Imaging;
 	var Media = Windows.Media;
 
-    // Receive notifications about rotation of the device and UI and apply any necessary rotation to the preview stream and UI controls
+    // 收到關於介面或裝置的旋轉通知，並作對應的動作。
 	var oDisplayInformation = Windows.Graphics.Display.DisplayInformation.getForCurrentView(),
         oDisplayOrientation = DisplayOrientations.portrait;
 
-    // Prevent the screen from sleeping while the camera is running
+    // 當照相機工作時，防止休眠
 	var oDisplayRequest = new Windows.System.Display.DisplayRequest();
 
-    // For listening to media property changes
+    // 監聽媒體性質的改變
 	var oSystemMediaControls = Media.SystemMediaTransportControls.getForCurrentView();
 
-    // MediaCapture and its state variables
+    // 媒體裝置與狀態參數
 	var oMediaCapture = null,
         isInitialized = false,
         isPreviewing = false,
         isRecording = false ;
 
-
-    // Information about the camera device
+    // 相機裝置的資訊
 	var externalCamera = false,
         mirroringPreview = false;
 
-    // Rotation metadata to apply to the preview stream and recorded videos (MF_MT_VIDEO_ROTATION)
-    // Reference: http://msdn.microsoft.com/en-us/library/windows/apps/xaml/hh868174.aspx
+    // 旋轉的原始資料，以便應用於串流(MF_MT_VIDEO_ROTATION)
+    // 參考連結: http://msdn.microsoft.com/en-us/library/windows/apps/xaml/hh868174.aspx
 	var RotationKey = "C380465D-2271-428C-9B83-ECEA3B4A85C1";
 
 	var app = WinJS.Application;
@@ -97,41 +96,40 @@
 	}
 
     /// <summary>
-    /// Initializes the MediaCapture, registers events, gets camera device information for mirroring and rotating, starts preview and unlocks the UI
+    /// 初始化相機，註冊事件，取得相機鏡射、旋轉的資訊，開始預覽並對UI解鎖。
     /// </summary>
     /// <returns></returns>
 	function initializeCameraAsync() {
 	    console.log("InitializeCameraAsync");
 
-	    // Get available devices for capturing pictures
+	    // 取得可以照相的裝置
 	    return findCameraDeviceByPanelAsync(Windows.Devices.Enumeration.Panel.back)
         .then(function (camera) {
             if (!camera) {
                 console.log("No camera device found!");
                 return;
             }
-            // Figure out where the camera is located
+            // 尋找相機的位置
             if (!camera.enclosureLocation || camera.enclosureLocation.panel === Windows.Devices.Enumeration.Panel.unknown) {
-                // No information on the location of the camera, assume it's an external camera, not integrated on the device
+                // 沒有相機的位置資訊，假設是外接相機，非內建相機。
                 externalCamera = true;
-            }
-            else {
-                // Camera is fixed on the device
+            } else {
+                // 內建相機
                 externalCamera = false;
 
-                // Only mirror the preview if the camera is on the front panel
+                // 如果為前置鏡頭，鏡射影像。
                 mirroringPreview = (camera.enclosureLocation.panel === Windows.Devices.Enumeration.Panel.front);
             }
 
             oMediaCapture = new Capture.MediaCapture();
 
-            // Register for a notification when something goes wrong
+            // 註冊事件，當有問題發生時可以處理
             oMediaCapture.addEventListener("failed", mediaCapture_failed);
 
             var settings = new Capture.MediaCaptureInitializationSettings();
             settings.videoDeviceId = camera.id;
 
-            // Initialize media capture and start the preview
+            // 初始化裝置並開始預覽
             return oMediaCapture.initializeAsync(settings);
         }).then(function () {
             isInitialized = true;
@@ -142,7 +140,7 @@
 	}
 
     /// <summary>
-    /// Cleans up the camera resources (after stopping any video recording and/or preview if necessary) and unregisters from MediaCapture events
+    /// 清除相機資源 (在錄影或停止預覽之後) ，並取消註冊事件
     /// </summary>
     /// <returns></returns>
 	function cleanupCameraAsync() {
@@ -161,7 +159,7 @@
 	        isInitialized = false;
 	    }
 
-	    // When all our tasks complete, clean up MediaCapture
+	    // 當所有工作都完成時，清除 MediaCapture
 	    return WinJS.Promise.join(promiseList)
         .then(function () {
             if (oMediaCapture != null) {
@@ -173,16 +171,16 @@
 	}
 
     /// <summary>
-    /// Starts the preview and adjusts it for for rotation and mirroring after making a request to keep the screen on
+    /// 開始預覽、保持螢幕開啟，並調整旋轉與鏡射。
     /// </summary>
 	function startPreviewAsync() {
-	    // Prevent the device from sleeping while the preview is running
+	    // 防止螢幕休眠
 	    oDisplayRequest.requestActive();
 
-	    // Register to listen for media property changes
+	    // 註冊Property改變的監聽事件
 	    oSystemMediaControls.addEventListener("propertychanged", systemMediaControls_PropertyChanged);
 
-	    // Set the preview source in the UI and mirror it if necessary
+	    // 設定預覽的src，如果需要的話使其鏡像
 	    var previewVidTag = document.getElementById("cameraPreview");
 	    if (mirroringPreview) {
 	        cameraPreview.style.transform = "scale(-1, 1)";
@@ -202,24 +200,24 @@
 	}
 
     /// <summary>
-    /// Gets the current orientation of the UI in relation to the device (when AutoRotationPreferences cannot be honored) and applies a corrective rotation to the preview
+    /// 取得現在UI對於裝置的方向性 ( 當 AutoRotationPreferences 無法完成 ) 並正確的旋轉預覽
     /// </summary>
     /// <returns></returns>
 	function setPreviewRotationAsync() {
-	    // Only need to update the orientation if the camera is mounted on the device
+	    // 當相機附在裝置上時，只需要更新方向性
 	    if (externalCamera) {
 	        return WinJS.Promise.as();
 	    }
 
-	    // Calculate which way and how far to rotate the preview
+	    // 計算旋轉預覽的方向與角度
 	    var rotationDegrees = convertDisplayOrientationToDegrees(oDisplayOrientation);
 
-	    // The rotation direction needs to be inverted if the preview is being mirrored
+	    // 如果已被鏡像的話，則需要翻轉
 	    if (mirroringPreview) {
 	        rotationDegrees = (360 - rotationDegrees) % 360;
 	    }
 
-	    // Add rotation metadata to the preview stream to make sure the aspect ratio / dimensions match when rendering and getting preview frames
+	    // 在預覽串流中加入旋轉的原始資料以確保aspect ratio / dimensions在取得預覽畫面及render時可以配合
 	    var props = oMediaCapture.videoDeviceController.getMediaStreamProperties(Capture.MediaStreamType.videoPreview);
 	    props.properties.insert(RotationKey, rotationDegrees);
 	    return oMediaCapture.setEncodingPropertiesAsync(Capture.MediaStreamType.videoPreview, props, null);
