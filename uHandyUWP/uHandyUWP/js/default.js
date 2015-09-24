@@ -47,7 +47,10 @@
 			oDisplayInformation.addEventListener("orientationchanged", displayInformation_orientationChanged);
 			initializeCameraAsync();
 			args.setPromise(WinJS.UI.processAll());
-            
+
+		    // Test for touch
+			document.getElementById('cameraDiv').addEventListener('click',getTouchClick,false);
+			$('#ruler').draggable();
 		} else {
 		    // 此應用程式已被暫停並終止。
 		    // 若要建立流暢的使用者體驗，請在此還原應用程式狀態，以便讓應用程式看起來像是從未停止執行一樣。
@@ -71,6 +74,15 @@
 
 	    args.setPromise(cleanupCameraAsync());
 	};
+
+	function getTouchClick() {
+	    console.log('click By User');
+	    var touchCapabilities = new Windows.Devices.Input.TouchCapabilities();
+
+	    console.log("touchPresent " + touchCapabilities.touchPresent ); 
+	    console.log("contacts " + touchCapabilities.contacts );
+
+	}
 
 	function getZoomButtonClick() {
 	    console.log("getZoomButtonClick");
@@ -224,7 +236,7 @@
 	}
 
     /// <summary>
-    /// Stops the preview and deactivates a display request, to allow the screen to go into power saving modes
+    /// 停止預覽並解除顯示要求，以利螢幕進入省電模式
     /// </summary>
     /// <returns></returns>
 	function stopPreview() {

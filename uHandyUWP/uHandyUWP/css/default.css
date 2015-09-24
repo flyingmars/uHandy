@@ -40,3 +40,54 @@
 .leftBlank{
     background-color:white;
 }
+
+#ruler {
+    position: absolute;
+    width: 200px;
+    height: 30px;
+    top: 100px;
+    left: 20px;
+}
+
+.longline {
+    position: absolute;
+    background-color: #FFFFFF;
+    width: 2px;
+    height: 100%;
+}
+
+.leftline {
+    left: 0px;
+}
+
+.rightline {
+    right: 0px;
+}
+
+.midline {
+    left: 50%;
+}
+
+.yokoline {
+    position: absolute;
+    background-color: #FFFFFF;
+    width: 100%;
+    height: 2px;
+    top: 50%;
+}
+
+.shortline {
+    position: absolute;
+    background-color: #FFFFFF;
+    width: 2px;
+    top: 20%;
+    height: 60%;
+}
+
+.leftinnerline {
+    left: 25%;
+}
+
+.rightinnerline {
+    right: 25%;
+}
