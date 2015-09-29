@@ -46,18 +46,19 @@
 			    // 此應用程式已全新啟動。請在這裡初始化應用程式。
 			    document.getElementById("getPreviewFrameButton").addEventListener("click", getPreviewFrameButton_tapped);
 			    document.getElementById("zoomTestButton").addEventListener("click", getZoomButtonClick);
+			    document.getElementById("toggleRuler").addEventListener("click",getToggleRulerClick);
 			    previewFrameImage.src = null;
 			}
 			oDisplayInformation.addEventListener("orientationchanged", displayInformation_orientationChanged);
 			initializeCameraAsync();
 			args.setPromise(WinJS.UI.processAll());
 
-		    // 觸控測試
+		    // 觸控
 			document.getElementById('cameraDiv').addEventListener('click',getTouchClick,false);
 			oGestureHandler = initGestureHandler();
 			oGestureHandler.initialize();
 
-            // 尺標測試
+            // 尺標
 			$('#rulerInfo').draggable();
 
 		} else {
@@ -120,6 +121,12 @@
 	    }
 	    return that; 
 	};
+
+    // 處理按鈕事件函式
+
+	function getToggleRulerClick() {
+	    $("#rulerInfo").toggle();
+	}
 
 	function getTouchClick() {
 	    console.log('click By User');
