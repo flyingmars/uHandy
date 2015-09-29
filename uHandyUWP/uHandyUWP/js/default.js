@@ -33,8 +33,12 @@
     // 參考連結: http://msdn.microsoft.com/en-us/library/windows/apps/xaml/hh868174.aspx
 	var RotationKey = "C380465D-2271-428C-9B83-ECEA3B4A85C1";
 
+    // Windows App 必要參數
 	var app = WinJS.Application;
 	var activation = Windows.ApplicationModel.Activation;
+
+    // 觸控事件參數
+	var oGestureHandler;
 
 	app.onactivated = function (args) {
 		if (args.detail.kind === activation.ActivationKind.launch) {
@@ -48,9 +52,14 @@
 			initializeCameraAsync();
 			args.setPromise(WinJS.UI.processAll());
 
-		    // Test for touch
+		    // 觸控測試
 			document.getElementById('cameraDiv').addEventListener('click',getTouchClick,false);
+			oGestureHandler = initGestureHandler();
+			oGestureHandler.initialize();
+
+            // 尺標測試
 			$('#rulerInfo').draggable();
+
 		} else {
 		    // 此應用程式已被暫停並終止。
 		    // 若要建立流暢的使用者體驗，請在此還原應用程式狀態，以便讓應用程式看起來像是從未停止執行一樣。
@@ -73,6 +82,43 @@
 	    oSystemMediaControls.removeEventListener("propertychanged", systemMediaControls_PropertyChanged);
 
 	    args.setPromise(cleanupCameraAsync());
+	};
+
+    // 自己建立的函數
+
+	function initGestureHandler() {
+	    var that = {};
+	    var gr;
+	    var manipulating = false;
+	    var gesTarget;
+
+	    that.manipulationHandler = function (evt) {
+	        console.log("Into handler");
+	        if (evt.delta) {
+	            console.log(evt.delta);
+	        }
+	    };
+	    that.manipulationStartedHandler = function (evt) {
+	        manipulating = true;
+	        that.manipulationHandler(evt);
+	    };
+	    that.manipulationDeltaHandler = function (evt) {
+	        that.manipulationHandler(evt);
+	    };
+	    that.manipulationEndHandler = function (evt) {
+	        manipulating = false;
+	        that.manipulationHandler(evt);
+	    };
+	    that.initialize = function () {
+	        gr = new Windows.UI.Input.GestureRecognizer();
+	        gr.gestureSettings = Windows.UI.Input.GestureSettings.manipulationScale;
+	        gr.showGestureFeedback = true;
+	        gr.addEventListener('manipulationstarted', that.manipulationStartedHandler);
+	        gr.addEventListener('manipulationupdated', that.manipulationDeltaHandler);
+	        gr.addEventListener('manipulationcompleted', that.manipulationEndHandler);
+	        gesTarget = document.getElementById("cameraDiv");
+	    }
+	    return that; 
 	};
 
 	function getTouchClick() {
