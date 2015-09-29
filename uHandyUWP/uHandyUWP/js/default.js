@@ -50,7 +50,7 @@
 
 		    // Test for touch
 			document.getElementById('cameraDiv').addEventListener('click',getTouchClick,false);
-			$('#ruler').draggable();
+			$('#rulerInfo').draggable();
 		} else {
 		    // 此應用程式已被暫停並終止。
 		    // 若要建立流暢的使用者體驗，請在此還原應用程式狀態，以便讓應用程式看起來像是從未停止執行一樣。
@@ -162,9 +162,8 @@
 
 	    if (isInitialized) {
 	        if (isPreviewing) {
-	            // The call to stop the preview is included here for completeness, but can be
-	            // safely removed if a call to MediaCapture.close() is being made later,
-	            // as the preview will be automatically stopped at that point
+	            // 在此完成停止預覽，但要安全地移除裝置的話，要用MediaCapture.close() 移除，這在稍後會做到。
+	            // 但在此會開始停止預覽。
 	            stopPreview();
 	        }
 
@@ -252,30 +251,29 @@
 	}
 
     /// <summary>
-    /// Gets the current preview frame as a SoftwareBitmap, displays its properties in a TextBlock, and can optionally display the image
-    /// in the UI and/or save it to disk as a jpg
+    /// 取得目前的Preview畫面，變成Bitmap，在Textblock中顯示properties，可以選擇是否要顯畫面，或/且存jpg在磁碟中。
     /// </summary>
     /// <returns></returns>
 	function getPreviewFrameAsSoftwareBitmapAsync() {
-	    // Get information about the preview
+	    // 取得 Preview 的資訊
 	    var previewProperties = oMediaCapture.videoDeviceController.getMediaStreamProperties(Capture.MediaStreamType.videoPreview);
 	    var videoFrameWidth = previewProperties.width;
 	    var videoFrameHeight = previewProperties.height;
 
-	    // Create the video frame to request a SoftwareBitmap preview frame
+	    // 創立一個影格以用來要求一個 SoftwareBitmap preview frame
 	    var videoFrame = new Windows.Media.VideoFrame(Imaging.BitmapPixelFormat.bgra8, videoFrameWidth, videoFrameHeight);
 
-	    // Capture the preview frame
+	    // 擷取一個影格
 	    return oMediaCapture.getPreviewFrameAsync(videoFrame)
         .then(function (currentFrame) {
-            // Collect the resulting frame
+            // 蒐集影格的結果
             var frameBitmap = currentFrame.softwareBitmap;
 
-            // Show the frame information
-            //frameInfoTextBlock.textContent = frameBitmap.pixelWidth + "x" + frameBitmap.pixelHeight + " " +
-                //stringOfEnumeration(Windows.Graphics.DirectX.DirectXPixelFormat, frameBitmap.bitmapPixelFormat);
+            // 顯示影格資訊
+            console.log( frameBitmap.pixelWidth + "x" + frameBitmap.pixelHeight + " " +
+                stringOfEnumeration(Windows.Graphics.DirectX.DirectXPixelFormat, frameBitmap.bitmapPixelFormat) );
 
-            // Save and show the frame (as is, no rotation is being applied)
+            // 儲存、顯示影格（無旋轉）
             return saveAndShowSoftwareBitmapAsync(frameBitmap);
             /*
             if (saveShowFrameCheckBox.checked === true) {
@@ -290,33 +288,32 @@
 	}
 
     /// <summary>
-    /// Gets the current preview frame as a Direct3DSurface and displays its properties in a TextBlock
+    /// 取得目前的Preview frame，把他當成 Direct3DSurface，並在 TextBlock 顯示性質
     /// </summary>
     /// <returns></returns>
 	function getPreviewFrameAsD3DSurfaceAsync() {
-	    // Capture the preview frame as a D3D surface
+	    // 取得 preview frame ，當做是 D3D surface
 	    return oMediaCapture.getPreviewFrameAsync()
         .then(function (currentFrame) {
-            // Check that the Direct3DSurface isn't null. It's possible that the device does not support getting the frame
-            // as a D3D surface
+            // 確定 Direct3DSurface 非 null（也有可能是裝置不支援取得影格當做D3D surface）
             if (currentFrame.direct3DSurface != null) {
-                // Collect the resulting frame
+                // 蒐集結果影格
                 var surface = currentFrame.direct3DSurface;
 
-                // Show the frame information
+                // 顯示影格資訊
                 frameInfoTextBlock.textContent = surface.description.width + "x" + surface.description.height + " " +
                     stringOfEnumeration(Windows.Graphics.DirectX.DirectXPixelFormat, surface.description.format);
             }
-            else { // Fall back to software bitmap
-                // Collect the resulting frame
+            else { // 不能用D3D，使用軟體Bitmap
+                // 蒐集結果影格
                 var frameBitmap = currentFrame.softwareBitmap;
 
-                // Show the frame information
+                // 顯示影格資訊
                 frameInfoTextBlock.textContent = frameBitmap.pixelWidth + "x" + frameBitmap.pixelHeight + " " +
                     stringOfEnumeration(Windows.Graphics.DirectX.DirectXPixelFormat, frameBitmap.bitmapPixelFormat);
             }
 
-            // Clear the image
+            // 清除影像
             previewFrameImage.src = null;
         }, function (error) {
             console.log(error.message)
@@ -324,7 +321,7 @@
 	}
 
     /// <summary>
-    /// Saves a SoftwareBitmap to the Pictures library with the specified name
+    /// 把 SoftwareBitmap 用一個獨特的名字儲存到 Pictures library
     /// </summary>
     /// <param name="bitmap"></param>
     /// <returns></returns>
@@ -337,11 +334,11 @@
         }).then(function (outputStream) {
             return Imaging.BitmapEncoder.createAsync(Imaging.BitmapEncoder.jpegEncoderId, outputStream);
         }).then(function (encoder) {
-            // Grab the data from the SoftwareBitmap
+            // 從 SoftwareBitmap 取得資料
             encoder.setSoftwareBitmap(bitmap);
             return encoder.flushAsync();
         }).done(function () {
-            // Finally display the image at the correct orientation
+            // 最後用正確的方向顯示影像
             previewFrameImage.src = oFile.path;
             previewFrameImage.style.transform = "rotate(" + convertDisplayOrientationToDegrees(oDisplayOrientation) + "deg)";
         });
@@ -349,13 +346,13 @@
 
 
     /// <summary>
-    /// Attempts to find and return a device mounted on the panel specified, and on failure to find one it will return the first device listed
+    /// 嘗試尋找並回傳一個本機裝置，或是找不到的話回傳表單中第一個裝置
     /// </summary>
-    /// <param name="panel">The desired panel on which the returned device should be mounted, if available</param>
+    /// <param name="panel">回傳的裝置必須是掛載的裝置</param>
     /// <returns></returns>
 	function findCameraDeviceByPanelAsync(panel) {
 	    var deviceInfo = null;
-	    // Get available devices for capturing pictures
+	    // 取得可以截取畫面的裝置
 	    return DeviceInformation.findAllAsync(DeviceClass.videoCapture)
         .then(function (devices) {
             devices.forEach(function (cameraDeviceInfo) {
@@ -365,7 +362,7 @@
                 }
             });
 
-            // Nothing matched, just return the first
+            // 什麼都沒找到，回傳第一個
             if (!deviceInfo && devices.length > 0) {
                 deviceInfo = devices.getAt(0);
             }
@@ -375,9 +372,9 @@
 	}
 
     /// <summary>
-    /// Converts the given orientation of the app on the screen to the corresponding rotation in degrees
+    /// 算出需轉換的角度，在給定APP的方向性下
     /// </summary>
-    /// <param name="orientation">The orientation of the app on the screen</param>
+    /// <param name="orientation"> APP 的 Orientation </param>
     /// <returns>An orientation in degrees</returns>
 	function convertDisplayOrientationToDegrees(orientation) {
 	    switch (orientation) {
@@ -394,9 +391,9 @@
 	}
 
     /// <summary>
-    /// This event will fire when the page is rotated, when the DisplayInformation.AutoRotationPreferences value set in the setupUiAsync() method cannot be not honored.
+    /// 當頁面旋轉的時候，且 DisplayInformation.AutoRotationPreferences 的值無法在 setupUiAsync() 中被完成時，會激發這個事件。
     /// </summary>
-    /// <param name="sender">The event source.</param>
+    /// <param name="sender">事件來源</param>
 	function displayInformation_orientationChanged(args) {
 	    oDisplayOrientation = args.target.currentOrientation;
 
@@ -406,7 +403,7 @@
 	}
 
 	function getPreviewFrameButton_tapped() {
-	    // If preview is not running, no preview frames can be acquired
+	    // 如果沒有在 preview 中，則無法取得畫面
 	    if (!isPreviewing) {
 	        return;
 	    }
@@ -433,7 +430,7 @@
 	function startRecordingAsync() {
 	    return Windows.Storage.KnownFolders.picturesLibrary.createFileAsync("SimpleVideo.mp4", Windows.Storage.CreationCollisionOption.generateUniqueName)
         .then(function (file) {
-            // Calculate rotation angle, taking mirroring into account if necessary
+            // 計算旋轉角度，在必要時鏡射
             var rotationAngle = 360 - convertDeviceOrientationToDegrees(getCameraOrientation());
             var encodingProfile = Windows.Media.MediaProperties.MediaEncodingProfile.createMp4(Windows.Media.MediaProperties.VideoEncodingQuality.auto);
             encodingProfile.video.properties.insert(RotationKey, rotationAngle);
@@ -449,13 +446,12 @@
 
 
     /// <summary>
-    /// In the event of the app being minimized this method handles media property change events. If the app receives a mute
-    /// notification, it is no longer in the foregroud.
+    /// 在APP被最小化的事件中，這個方法可以處理媒體性質改變。如果APP收到一個 mute notification，則此APP就不會在前景
     /// </summary>
     /// <param name="args"></param>
 	function systemMediaControls_PropertyChanged(args) {
-	    // Check to see if the app is being muted. If so, it is being minimized.
-	    // Otherwise if it is not initialized, it is being brought into focus.
+	    // 檢查APP是不是被 muted。如果是的話，則被最小化了。
+	    // 否則，就是還沒被初始化，正準備放到主畫面（focus）
 	    if (args.target.soundLevel === Media.SoundLevel.muted) {
 	        cleanupCameraAsync();
 	    }
@@ -471,16 +467,15 @@
 	}
 
     /// <summary>
-    /// Converts an enum to a readable string
+    /// 轉換 enum 至可讀的字串
     /// </summary>
-    /// <param name="enumeration">The actual enumeration</param>
-    /// <param name="enumeration">The value of the given enumeration</param>
-    /// <returns>String of the enumeration value</returns>
+    /// <param name="enumeration">Enumeration</param>
+    /// <param name="enumeration">enumeration的值</param>
+    /// <returns>enumeration value轉換出的字串</returns>
 	function stringOfEnumeration(enumeration, value) {
 	    for (var k in enumeration) if (enumeration[k] == value) {
 	        return k;
 	    }
-
 	    return null;
 	}
 

@@ -41,12 +41,24 @@
     background-color:white;
 }
 
-#ruler {
-    position: absolute;
-    width: 200px;
-    height: 30px;
+#rulerInfo{
+    position:absolute;
+    width: 200px ;
+    height: 50px ;
     top: 100px;
     left: 20px;
+}
+
+#ruler {
+    position: relative;
+    width: 100%;
+    height: 60%;
+}
+
+.rulerNum{
+    position: relative;
+    width: 100%;
+    height: 40%;   
 }
 
 .longline {
