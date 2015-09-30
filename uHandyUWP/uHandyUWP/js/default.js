@@ -39,9 +39,6 @@
 
     // 觸控事件參數
 	var oGestureHandler;
-
-    // Ruler 長度控制參數
-	var originRatio = 100;
     
 
 	app.onactivated = function (args) {
@@ -70,8 +67,7 @@
 
 		    // 觸控
 			document.getElementById('cameraDiv').addEventListener('click',getTouchClick,false);
-			oGestureHandler = initGestureHandler();
-			oGestureHandler.initialize();
+			initGestureHandler();
 
             // 尺標
 			$('#rulerInfo').draggable();
@@ -104,47 +100,36 @@
     // 自己建立的函數
 	function resizeHandler() {
 	    // 尺規校正
+	    var originRatio = 100;
 	    var displayWidth = document.getElementById('cameraDiv').clientWidth;
 	    var rulerWidth = document.getElementById('rulerInfo').clientWidth;
-	    console.log(displayWidth);
-	    var displayValue = Math.round(displayWidth / rulerWidth * originRatio);
+	    var displayValue = Math.round(displayWidth / rulerWidth * originRatio / 10) * 10;
 	    $('#rulerInfo > .rulerNum').html(displayValue + ' ㎛');
 	}
 
 	function initGestureHandler() {
-	    var that = {};
-	    var gr;
-	    var manipulating = false;
-	    var gesTarget;
+	    var myGesture = new MSGesture();
+	    var elm = document.getElementById("cameraDiv");
 
-	    that.manipulationHandler = function (evt) {
-	        console.log("Into handler");
-	        if (evt.delta) {
-	            console.log(evt.delta);
-	        }
-	    };
-	    that.manipulationStartedHandler = function (evt) {
-	        manipulating = true;
-	        that.manipulationHandler(evt);
-	    };
-	    that.manipulationDeltaHandler = function (evt) {
-	        that.manipulationHandler(evt);
-	    };
-	    that.manipulationEndHandler = function (evt) {
-	        manipulating = false;
-	        that.manipulationHandler(evt);
-	    };
-	    that.initialize = function () {
-	        gr = new Windows.UI.Input.GestureRecognizer();
-	        gr.gestureSettings = Windows.UI.Input.GestureSettings.manipulationScale;
-	        gr.showGestureFeedback = true;
-	        gr.addEventListener('manipulationstarted', that.manipulationStartedHandler);
-	        gr.addEventListener('manipulationupdated', that.manipulationDeltaHandler);
-	        gr.addEventListener('manipulationcompleted', that.manipulationEndHandler);
-	        gesTarget = document.getElementById("cameraDiv");
-	    }
-	    return that; 
-	};
+	    myGesture.target = elm;
+
+	    var handleGesture = null;
+        var pointerListener = function (evt) {
+            console.log('Pointer Listener');
+            myGesture.addPointer(evt.pointerId);
+
+        };
+        var eventListener = function (evt) {
+            console.log(evt.target.style.transform);
+            //var m = new MSCSSMatrix(evt.scale);
+            console.log(evt.scale);
+            //evt.target.style.transform = m.translate(evt.scale);
+        };
+        
+	    elm.addEventListener("MSGestureChange", eventListener);
+	    elm.addEventListener("pointerdown", pointerListener);
+
+	}
 
     // 處理按鈕事件函式
 
@@ -160,8 +145,8 @@
 	    console.log('click By User');
 	    var touchCapabilities = new Windows.Devices.Input.TouchCapabilities();
 
-	    console.log("touchPresent " + touchCapabilities.touchPresent ); 
-	    console.log("contacts " + touchCapabilities.contacts );
+	    //console.log("touchPresent " + touchCapabilities.touchPresent ); 
+	    //console.log("contacts " + touchCapabilities.contacts );
 
 	}
 
