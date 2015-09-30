@@ -40,15 +40,30 @@
     // 觸控事件參數
 	var oGestureHandler;
 
+    // Ruler 長度控制參數
+	var originRatio = 100;
+    
+
 	app.onactivated = function (args) {
 		if (args.detail.kind === activation.ActivationKind.launch) {
 			if (args.detail.previousExecutionState !== activation.ApplicationExecutionState.terminated) {
 			    // 此應用程式已全新啟動。請在這裡初始化應用程式。
-			    document.getElementById("getPreviewFrameButton").addEventListener("click", getPreviewFrameButton_tapped);
-			    document.getElementById("zoomTestButton").addEventListener("click", getZoomButtonClick);
-			    document.getElementById("toggleRuler").addEventListener("click",getToggleRulerClick);
+
+                // 按鈕註冊
+			    $("#getPreviewFrameButton")
+                    .mousedown(getPreviewFrameButton_clicked)
+                    .mouseup(getPreviewFrameButton_tapped);
+			    $("#zoomTestButton").click(getZoomButtonClick);
+			    $("#toggleRuler")
+                    .mousedown(getToggleRulerButton_clicked)
+                    .mouseup(getToggleRulerButton_tapped);
+
+			    $(window).resize(resizeHandler);
+
+                // Preview 位址
 			    previewFrameImage.src = null;
 			}
+            // 視窗事件註冊
 			oDisplayInformation.addEventListener("orientationchanged", displayInformation_orientationChanged);
 			initializeCameraAsync();
 			args.setPromise(WinJS.UI.processAll());
@@ -60,6 +75,7 @@
 
             // 尺標
 			$('#rulerInfo').draggable();
+			resizeHandler();
 
 		} else {
 		    // 此應用程式已被暫停並終止。
@@ -86,6 +102,14 @@
 	};
 
     // 自己建立的函數
+	function resizeHandler() {
+	    // 尺規校正
+	    var displayWidth = document.getElementById('cameraDiv').clientWidth;
+	    var rulerWidth = document.getElementById('rulerInfo').clientWidth;
+	    console.log(displayWidth);
+	    var displayValue = Math.round(displayWidth / rulerWidth * originRatio);
+	    $('#rulerInfo > .rulerNum').html(displayValue + ' ㎛');
+	}
 
 	function initGestureHandler() {
 	    var that = {};
@@ -124,8 +148,12 @@
 
     // 處理按鈕事件函式
 
-	function getToggleRulerClick() {
+	function getToggleRulerButton_clicked() {
+	    $("#toggleRuler > i").css('color','gray');
+	}
+	function getToggleRulerButton_tapped() {
 	    $("#rulerInfo").toggle();
+	    $("#toggleRuler > i").css('color', 'white');
 	}
 
 	function getTouchClick() {
@@ -144,7 +172,8 @@
 	    var zoomValueMin = null;
 	    var zoomValueNow = null;
 	    var zoomValueStep = null;
-        var zoomSet = new Windows.Media.Devices.ZoomSettings();
+	    var zoomSet = new Windows.Media.Devices.ZoomSettings();
+
 	    if (isInitialized) {
 	        if (isPreviewing) {
 	            zoomValueNow = videoDev.zoom.tryGetValue();
@@ -152,12 +181,27 @@
 	            zoomValueMin = videoDev.zoom.capabilities.min ;
 	            zoomValueMax = videoDev.zoom.capabilities.max;
 	            console.log(videoDev.zoomControl.supported);
-
 	            zoomSet.Mode = Windows.Media.Devices.ZoomTransitionMode.Auto;
 	            zoomSet.Value = zoomValueNow + zoomValueStep;
 	            //videoDev.zoomControl.configure(zoomSet);
+                
+	            console.log('set state' + videoDev.zoomControl.configure(zoomSet));
 	        }
 	    }
+	}
+
+	function getPreviewFrameButton_clicked(){
+	    $('#getPreviewFrameButton > i').css('color','gray');
+	}
+
+	function getPreviewFrameButton_tapped() {
+	    // 如果沒有在 preview 中，則無法取得畫面
+	    if (!isPreviewing) {
+	        return;
+	    }
+	    $('#getPreviewFrameButton > i').css('color', 'white');
+	    getPreviewFrameAsSoftwareBitmapAsync().done();
+	    
 	}
 
     /// <summary>
@@ -453,14 +497,6 @@
 	    if (isPreviewing) {
 	        setPreviewRotationAsync();
 	    }
-	}
-
-	function getPreviewFrameButton_tapped() {
-	    // 如果沒有在 preview 中，則無法取得畫面
-	    if (!isPreviewing) {
-	        return;
-	    }
-	    getPreviewFrameAsSoftwareBitmapAsync().done();
 	}
 
 	function getRecord_tapped() {
