@@ -121,7 +121,7 @@
         };
         var eventListener = function (evt) {
             console.log(evt.target.style.transform);
-            //var m = new MSCSSMatrix(evt.scale);
+            //var m = new MSCSSMatrix(evt.scale);  MSCSSMatrix好像不能用
             console.log(evt.scale);
             //evt.target.style.transform = m.translate(evt.scale);
         };
