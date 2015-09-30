@@ -7,11 +7,14 @@
     width:100%;
     height:100%;
     margin-bottom:-100px;
+
 }
 
 #cameraPreview {
     width:100%;
     height:auto;
+    outline:hidden;
+    z-index:1;
 }
 
 #sideBar{
@@ -47,6 +50,7 @@
     height: 50px ;
     top: 100px;
     left: 20px;
+    z-index:4;
 }
 
 #ruler {

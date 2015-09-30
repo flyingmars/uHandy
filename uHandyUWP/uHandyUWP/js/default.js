@@ -54,8 +54,7 @@
 			    $("#toggleRuler")
                     .mousedown(getToggleRulerButton_clicked)
                     .mouseup(getToggleRulerButton_tapped);
-
-			    $(window).resize(resizeHandler);
+			    $('#cameraPreview').resize(resizeHandler);
 
                 // Preview 位址
 			    previewFrameImage.src = null;
@@ -100,30 +99,42 @@
     // 自己建立的函數
 	function resizeHandler() {
 	    // 尺規校正
+	    var scaleCorrect = $('#cameraPreview').css('transform').split(',')[3] || 1;
+	    console.log('resize ' + scaleCorrect);
 	    var originRatio = 100;
-	    var displayWidth = document.getElementById('cameraDiv').clientWidth;
+	    var displayWidth = document.getElementById('cameraPreview').clientWidth;
 	    var rulerWidth = document.getElementById('rulerInfo').clientWidth;
-	    var displayValue = Math.round(displayWidth / rulerWidth * originRatio / 10) * 10;
+	    var displayValue = Math.round(displayWidth / scaleCorrect / rulerWidth * originRatio / 10) * 10;
 	    $('#rulerInfo > .rulerNum').html(displayValue + ' ㎛');
 	}
 
 	function initGestureHandler() {
 	    var myGesture = new MSGesture();
 	    var elm = document.getElementById("cameraDiv");
-
+	    var changing = false;
 	    myGesture.target = elm;
 
 	    var handleGesture = null;
         var pointerListener = function (evt) {
-            console.log('Pointer Listener');
             myGesture.addPointer(evt.pointerId);
-
         };
         var eventListener = function (evt) {
-            console.log(evt.target.style.transform);
-            //var m = new MSCSSMatrix(evt.scale);  MSCSSMatrix好像不能用
-            console.log(evt.scale);
-            //evt.target.style.transform = m.translate(evt.scale);
+            var currentScale = $('#cameraPreview').css('transform').split(',')[3];
+            
+            if (currentScale) {
+                var newScale = evt.scale * currentScale;
+                newScale = (newScale < 1) ? 1 : newScale;
+                $('#cameraPreview').css('transform', 'scale(' + newScale + ',' + newScale + ')');
+                resizeHandler(newScale);
+            } else {
+                if (evt.scale >= 1) {
+                    $('#cameraPreview').css('transform', 'scale(' + evt.scale + ',' + evt.scale + ')');
+                    resizeHandler(evt.scale);
+                }
+                
+            }
+            
+            
         };
         
 	    elm.addEventListener("MSGestureChange", eventListener);
