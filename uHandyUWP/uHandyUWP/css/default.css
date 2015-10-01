@@ -80,10 +80,6 @@
     right: 0px;
 }
 
-.midline {
-    left: 50%;
-}
-
 .yokoline {
     position: absolute;
     background-color: #FFFFFF;
@@ -98,12 +94,4 @@
     width: 2px;
     top: 20%;
     height: 60%;
-}
-
-.leftinnerline {
-    left: 25%;
-}
-
-.rightinnerline {
-    right: 25%;
 }

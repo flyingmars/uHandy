@@ -100,7 +100,6 @@
 	function resizeHandler() {
 	    // 尺規校正
 	    var scaleCorrect = $('#cameraPreview').css('transform').split(',')[3] || 1;
-	    console.log('resize ' + scaleCorrect);
 	    var originRatio = 100;
 	    var displayWidth = document.getElementById('cameraPreview').clientWidth;
 	    var rulerWidth = document.getElementById('rulerInfo').clientWidth;
@@ -123,18 +122,16 @@
             
             if (currentScale) {
                 var newScale = evt.scale * currentScale;
-                newScale = (newScale < 1) ? 1 : newScale;
-                $('#cameraPreview').css('transform', 'scale(' + newScale + ',' + newScale + ')');
-                resizeHandler(newScale);
+                newScale = (newScale < 1.0) ? 1.0 : newScale;
+                $('#cameraPreview').css('transform', 'scale(' + newScale + ')');
+                resizeHandler();
+                console.log('currentScale ' + currentScale);
             } else {
                 if (evt.scale >= 1) {
-                    $('#cameraPreview').css('transform', 'scale(' + evt.scale + ',' + evt.scale + ')');
-                    resizeHandler(evt.scale);
-                }
-                
+                    $('#cameraPreview').css('transform', 'scale(' + evt.scale + ')');
+                    resizeHandler();
+                }   
             }
-            
-            
         };
         
 	    elm.addEventListener("MSGestureChange", eventListener);
@@ -164,24 +161,24 @@
 	function getZoomButtonClick() {
 	    console.log("getZoomButtonClick");
 	    var videoDev = oMediaCapture.videoDeviceController ;
-	    var zoomValueMax = null;
-	    var zoomValueMin = null;
-	    var zoomValueNow = null;
-	    var zoomValueStep = null;
+	    var focusValueMax = null;
+	    var focusValueMin = null;
+	    var focusValueNow = null;
+	    var focusValueStep = null;
 	    var zoomSet = new Windows.Media.Devices.ZoomSettings();
 
 	    if (isInitialized) {
 	        if (isPreviewing) {
-	            zoomValueNow = videoDev.zoom.tryGetValue();
-	            zoomValueStep = videoDev.zoom.capabilities.step;
-	            zoomValueMin = videoDev.zoom.capabilities.min ;
-	            zoomValueMax = videoDev.zoom.capabilities.max;
-	            console.log(videoDev.zoomControl.supported);
-	            zoomSet.Mode = Windows.Media.Devices.ZoomTransitionMode.Auto;
-	            zoomSet.Value = zoomValueNow + zoomValueStep;
+	            focusValueNow = videoDev.contrast.tryGetValue().value;
+	            focusValueStep = videoDev.focus.capabilities.step;
+	            focusValueMin = videoDev.focus.capabilities.min ;
+	            focusValueMax = videoDev.focus.capabilities.max;
+	            console.log( 'set = ' + videoDev.contrast.trySetAuto(true) );
+	            //zoomSet.Mode = Windows.Media.Devices.ZoomTransitionMode.Auto;
+	            //zoomSet.Value = zoomValueNow + zoomValueStep;
 	            //videoDev.zoomControl.configure(zoomSet);
                 
-	            console.log('set state' + videoDev.zoomControl.configure(zoomSet));
+	            //console.log('set state' + videoDev.zoomControl.configure(zoomSet));
 	        }
 	    }
 	}
@@ -361,11 +358,11 @@
         .then(function (currentFrame) {
             // 蒐集影格的結果
             var frameBitmap = currentFrame.softwareBitmap;
-
+            
             // 顯示影格資訊
             console.log( frameBitmap.pixelWidth + "x" + frameBitmap.pixelHeight + " " +
                 stringOfEnumeration(Windows.Graphics.DirectX.DirectXPixelFormat, frameBitmap.bitmapPixelFormat) );
-
+            
             // 儲存、顯示影格（無旋轉）
             return saveAndShowSoftwareBitmapAsync(frameBitmap);
             /*
@@ -419,8 +416,9 @@
     /// <param name="bitmap"></param>
     /// <returns></returns>
 	function saveAndShowSoftwareBitmapAsync(bitmap) {
+	    console.log(bitmap);
 	    var oFile = null;
-	    return Windows.Storage.KnownFolders.picturesLibrary.createFileAsync("PreviewFrame.jpg", Windows.Storage.CreationCollisionOption.generateUniqueName)
+	    return Windows.Storage.KnownFolders.picturesLibrary.createFileAsync("uHandy.jpg", Windows.Storage.CreationCollisionOption.generateUniqueName)
         .then(function (file) {
             oFile = file;
             return file.openAsync(Windows.Storage.FileAccessMode.readWrite);
@@ -428,6 +426,7 @@
             return Imaging.BitmapEncoder.createAsync(Imaging.BitmapEncoder.jpegEncoderId, outputStream);
         }).then(function (encoder) {
             // 從 SoftwareBitmap 取得資料
+            
             encoder.setSoftwareBitmap(bitmap);
             return encoder.flushAsync();
         }).done(function () {
