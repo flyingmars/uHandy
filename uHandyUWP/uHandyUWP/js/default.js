@@ -39,7 +39,6 @@
 
     // 觸控事件參數
 	var oGestureHandler;
-    
 
 	app.onactivated = function (args) {
 		if (args.detail.kind === activation.ActivationKind.launch) {
@@ -99,25 +98,49 @@
     // 自己建立的函數
 	function resizeHandler() {
 	    // 尺規校正
+	    var zoomScale = oMediaCapture ? oMediaCapture.videoDeviceController.zoom.tryGetValue().value * 450/500 : 0 ;
 	    var scaleCorrect = $('#cameraPreview').css('transform').split(',')[3] || 1;
 	    var originRatio = 100;
 	    var displayWidth = document.getElementById('cameraPreview').clientWidth;
 	    var rulerWidth = document.getElementById('rulerInfo').clientWidth;
-	    var displayValue = Math.round(displayWidth / scaleCorrect / rulerWidth * originRatio / 10) * 10;
+	    var displayValue = Math.round( (displayWidth / scaleCorrect / rulerWidth * originRatio -zoomScale)/ 10) * 10;
 	    $('#rulerInfo > .rulerNum').html(displayValue + ' ㎛');
+	    console.log('resize = ' + zoomScale);
 	}
 
 	function initGestureHandler() {
 	    var myGesture = new MSGesture();
 	    var elm = document.getElementById("cameraDiv");
-	    var changing = false;
+        
 	    myGesture.target = elm;
 
 	    var handleGesture = null;
         var pointerListener = function (evt) {
             myGesture.addPointer(evt.pointerId);
         };
-        var eventListener = function (evt) {
+
+        var zoomHandler = function (evt) {
+            var videoDev  = oMediaCapture.videoDeviceController;
+            var valueNow  = videoDev.zoom.tryGetValue().value;
+            var valueStep = videoDev.zoom.capabilities.step;
+            var valueMin  = videoDev.zoom.capabilities.min;
+            var valueMax  = videoDev.zoom.capabilities.max;
+
+            var tryToSet  = Math.round( evt.scale * valueNow) % valueStep ;
+            tryToSet = Math.round(evt.scale * evt.scale * evt.scale * valueNow) - tryToSet;
+
+//            console.log('evt=' + evt.scale + ' want to ' + (valueNow + valueStep));
+            if (evt.scale > 1.0 && (valueNow + valueStep*2) <= valueMax) {
+                videoDev.zoom.trySetValue(valueNow + valueStep *2);
+                console.log('set state = ' + ( valueNow + valueStep ));
+            } else if (evt.scale < 1.0 && (valueNow - valueStep*2) >= valueMin) {
+                videoDev.zoom.trySetValue(valueNow - valueStep*2);
+                console.log('set state = ' + (valueNow - valueStep));
+            }
+            resizeHandler();
+        }
+
+        var softwareZoom = function (evt) {
             var currentScale = $('#cameraPreview').css('transform').split(',')[3];
             
             if (currentScale) {
@@ -134,7 +157,7 @@
             }
         };
         
-	    elm.addEventListener("MSGestureChange", eventListener);
+        elm.addEventListener("MSGestureChange", zoomHandler);
 	    elm.addEventListener("pointerdown", pointerListener);
 
 	}
@@ -169,16 +192,16 @@
 
 	    if (isInitialized) {
 	        if (isPreviewing) {
-	            focusValueNow = videoDev.contrast.tryGetValue().value;
-	            focusValueStep = videoDev.focus.capabilities.step;
-	            focusValueMin = videoDev.focus.capabilities.min ;
-	            focusValueMax = videoDev.focus.capabilities.max;
-	            console.log( 'set = ' + videoDev.contrast.trySetAuto(true) );
+	            focusValueNow = videoDev.zoom.tryGetValue().value;
+	            focusValueStep = videoDev.zoom.capabilities.step;
+	            focusValueMin = videoDev.zoom.capabilities.min ;
+	            focusValueMax = videoDev.zoom.capabilities.max;
+	            //console.log( 'set = ' + videoDev.contrast.trySetAuto(true) );
 	            //zoomSet.Mode = Windows.Media.Devices.ZoomTransitionMode.Auto;
 	            //zoomSet.Value = zoomValueNow + zoomValueStep;
 	            //videoDev.zoomControl.configure(zoomSet);
                 
-	            //console.log('set state' + videoDev.zoomControl.configure(zoomSet));
+	            console.log('set state = ' + videoDev.zoom.trySetValue(focusValueNow + focusValueStep));
 	        }
 	    }
 	}
@@ -235,6 +258,7 @@
             return oMediaCapture.initializeAsync(settings);
         }).then(function () {
             isInitialized = true;
+            oMediaCapture.videoDeviceController.zoom.trySetValue(1);
             return startPreviewAsync();
         }, function (error) {
             console.log(error.message);
