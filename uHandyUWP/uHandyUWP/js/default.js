@@ -53,6 +53,9 @@
 			    $("#toggleRuler")
                     .mousedown(getToggleRulerButton_clicked)
                     .mouseup(getToggleRulerButton_tapped);
+			    $("#canvasStart")
+                    .mousedown(getStartCanvas_clicked)
+                    .mouseup(getStartCanvas_tapped);
 			    $('#cameraPreview').resize(resizeHandler);
 
                 // Preview 位址
@@ -68,7 +71,7 @@
 			initGestureHandler();
 
             // 尺標
-			$('#rulerInfo').draggable();
+			$('#rulerInfo').draggable()  ;
 			resizeHandler();
 
 		} else {
@@ -98,14 +101,14 @@
     // 自己建立的函數
 	function resizeHandler() {
 	    // 尺規校正
-	    var zoomScale = oMediaCapture ? oMediaCapture.videoDeviceController.zoom.tryGetValue().value * 450/500 : 0 ;
+	    var zoomScale = oMediaCapture ? 500*Math.exp(-0.007* oMediaCapture.videoDeviceController.zoom.tryGetValue().value ): 500 ;
 	    var scaleCorrect = $('#cameraPreview').css('transform').split(',')[3] || 1;
 	    var originRatio = 100;
 	    var displayWidth = document.getElementById('cameraPreview').clientWidth;
 	    var rulerWidth = document.getElementById('rulerInfo').clientWidth;
-	    var displayValue = Math.round( (displayWidth / scaleCorrect / rulerWidth * originRatio -zoomScale)/ 10) * 10;
+	    var displayValue = Math.round( (zoomScale / scaleCorrect ) / 10) * 10;
 	    $('#rulerInfo > .rulerNum').html(displayValue + ' ㎛');
-	    console.log('resize = ' + zoomScale);
+	    //console.log('resize = ' + zoomScale);
 	}
 
 	function initGestureHandler() {
@@ -124,15 +127,12 @@
             var valueNow  = videoDev.zoom.tryGetValue().value;
             var valueStep = videoDev.zoom.capabilities.step;
             var valueMin  = videoDev.zoom.capabilities.min;
-            var valueMax  = videoDev.zoom.capabilities.max;
-
-            var tryToSet  = Math.round( evt.scale * valueNow) % valueStep ;
-            tryToSet = Math.round(evt.scale * evt.scale * evt.scale * valueNow) - tryToSet;
+            var valueMax = Math.min(300, videoDev.zoom.capabilities.max);
 
 //            console.log('evt=' + evt.scale + ' want to ' + (valueNow + valueStep));
             if (evt.scale > 1.0 && (valueNow + valueStep*2) <= valueMax) {
                 videoDev.zoom.trySetValue(valueNow + valueStep *2);
-                console.log('set state = ' + ( valueNow + valueStep ));
+                console.log('set state = ' + ( valueNow + valueStep*2 ));
             } else if (evt.scale < 1.0 && (valueNow - valueStep*2) >= valueMin) {
                 videoDev.zoom.trySetValue(valueNow - valueStep*2);
                 console.log('set state = ' + (valueNow - valueStep));
@@ -172,6 +172,32 @@
 	    $("#toggleRuler > i").css('color', 'white');
 	}
 
+	function getStartCanvas_clicked() {
+	    var flag = $("#canvasStart").data('myvalue');
+	    if (flag == 0) {
+	        $("#canvasStart > i").css('color', 'gray');
+	    } else {
+	        $("#canvasStart > i").css('color', 'pink');
+	    }
+	}
+
+	function getStartCanvas_tapped() {
+	    var flag = $("#canvasStart").data('myvalue');
+	    if (flag == 0) {
+	        $("#canvasStart > i").css('color', 'red');
+	        $("#rulerInfo").hide();
+	        $("#toggleRuler > i").hide();
+	        initInkCanvas();
+	        $("#canvasStart").data('myvalue', 1);
+	        $("#inkdraw").show();
+	    } else {
+	        $("#canvasStart > i").css('color', 'white');
+	        $("#toggleRuler > i").show();
+	        $("#inkdraw").hide();
+	        $("#canvasStart").data('myvalue', 0);
+	    }
+	}
+
 	function getTouchClick() {
 	    console.log('click By User');
 	    var touchCapabilities = new Windows.Devices.Input.TouchCapabilities();
@@ -188,20 +214,19 @@
 	    var focusValueMin = null;
 	    var focusValueNow = null;
 	    var focusValueStep = null;
-	    var zoomSet = new Windows.Media.Devices.ZoomSettings();
 
 	    if (isInitialized) {
 	        if (isPreviewing) {
-	            focusValueNow = videoDev.zoom.tryGetValue().value;
-	            focusValueStep = videoDev.zoom.capabilities.step;
-	            focusValueMin = videoDev.zoom.capabilities.min ;
-	            focusValueMax = videoDev.zoom.capabilities.max;
+	            focusValueNow = videoDev.focus.tryGetValue().value;
+	            focusValueStep = videoDev.focus.capabilities.step;
+	            focusValueMin = videoDev.focus.capabilities.min ;
+	            focusValueMax = videoDev.focus.capabilities.max;
 	            //console.log( 'set = ' + videoDev.contrast.trySetAuto(true) );
 	            //zoomSet.Mode = Windows.Media.Devices.ZoomTransitionMode.Auto;
 	            //zoomSet.Value = zoomValueNow + zoomValueStep;
 	            //videoDev.zoomControl.configure(zoomSet);
                 
-	            console.log('set state = ' + videoDev.zoom.trySetValue(focusValueNow + focusValueStep));
+	            console.log('set state = ' + videoDev.focus.trySetValue(focusValueNow + focusValueStep));
 	        }
 	    }
 	}
@@ -220,6 +245,160 @@
 	    
 	}
 
+	function initInkCanvas() {
+	    $('#inkdraw').show();
+	    var inkManager = new Windows.UI.Input.Inking.InkManager();
+	    var inkCanvas = document.getElementById("inkdraw");
+	    inkCanvas.setAttribute("width", inkCanvas.offsetWidth);
+	    inkCanvas.setAttribute("height", inkCanvas.offsetHeight);
+	    var inkContext = inkCanvas.getContext("2d");
+	    var pointerDeviceType = null;
+	    var pointerId = -1;
+
+	    var getPointerDeviceType = function (pId) {    
+	        var pointerPoint = Windows.UI.Input.PointerPoint.getCurrentPoint(pId);
+	        switch (pointerPoint.pointerDevice.pointerDeviceType) {
+	            case Windows.Devices.Input.PointerDeviceType.touch:
+	                pointerDeviceType = "Touch";
+	                break;
+
+	            case Windows.Devices.Input.PointerDeviceType.pen:
+	                pointerDeviceType = "Pen";
+	                break;
+
+	            case Windows.Devices.Input.PointerDeviceType.mouse:
+	                pointerDeviceType = "Mouse";
+	                break;
+	            default:
+	                pointerDeviceType = "Undefined";
+	        }
+	        return pointerDeviceType;
+	    };
+
+	    var onPointerDown = function (evt) {
+
+	        // Get the device type for the pointer input.
+	        pointerDeviceType = getPointerDeviceType(evt.pointerId);
+
+	        // Process pen and mouse (with left button) only. Reserve touch for manipulations.
+	        if ((pointerDeviceType === "Pen") || (pointerDeviceType === "Touch")  || ((pointerDeviceType === "Mouse") && (evt.button === 0))) {
+	            console.log(pointerDeviceType + " pointer down: Start stroke. ");
+
+	            // Process one pointer at a time.
+	            if (pointerId === -1) {
+	                var current = evt.currentPoint;
+
+	                // Start drawing the stroke.
+	                inkContext.beginPath();
+	                inkContext.lineWidth = '1';
+	                inkContext.strokeStyle = 'blue';
+	                inkContext.lineCap = "round";
+	                inkContext.lineJoin = "round";
+	                inkContext.moveTo( current.rawPosition.x, current.rawPosition.y);
+
+	                // Add current pointer to the ink manager (begin stroke).
+	                inkManager.processPointerDown(current);
+
+	                // The pointer id is used to restrict input processing to the current stroke.
+	                pointerId = evt.pointerId;
+	            }
+	        }
+	        else {
+	            // Process touch input.
+	        }
+	    };
+
+	    var onPointerMove = function (evt) {
+	        // Process pen and mouse (with left button) only. Reserve touch for manipulations.
+	        if ((pointerDeviceType === "Pen") || (pointerDeviceType === "Touch") || ((pointerDeviceType === "Mouse") && (evt.button === -1))) {
+
+	            // The pointer Id is used to restrict input processing to the current stroke.
+	            // pointerId is updated in onPointerDown().
+	            if (evt.pointerId === pointerId) {
+	                var current = evt.currentPoint;
+	                // Draw stroke in real time.
+	                inkContext.lineTo(current.rawPosition.x, current.rawPosition.y);
+	                inkContext.stroke();
+
+	                // Add current pointer to the ink manager (update stroke).
+	                inkManager.processPointerUpdate(current);
+	            }
+	        }
+	        else {
+	            // Process touch input.
+	        }
+	    };
+
+	    var onPointerUp = function (evt) {
+	        // Process pen and mouse (with left button) only. Reserve touch for manipulations.
+	        if ((pointerDeviceType === "Pen") || (pointerDeviceType === "Touch") || ((pointerDeviceType === "Mouse") && (evt.button === 0))) {
+	            console.log(pointerDeviceType + " pointer up: Finish stroke. ");
+	            if (evt.pointerId === pointerId) {
+	                // Add current pointer to the ink manager (end stroke).
+	                inkManager.processPointerUp(evt.currentPoint);
+
+	                // End live drawing.
+	                inkContext.closePath();
+
+	                // Render strokes using bezier curves.
+	                //renderAllStrokes();
+
+	                // Reset pointer Id.
+	                pointerId = -1;
+	            }
+	        }
+	        else {
+	            // Process touch input.
+	        }
+	    };
+
+	    var renderAllStrokes = function () {
+	        // Iterate through each stroke.
+	        inkManager.getStrokes().forEach(
+                function (stroke) {
+                    inkContext.beginPath();
+                    if (stroke.selected) {
+                        inkContext.lineWidth = stroke.drawingAttributes.size.width * 2;
+                        inkContext.strokeStyle = "green";
+                    } else {
+                        inkContext.lineWidth = stroke.drawingAttributes.size.width;
+                        inkContext.strokeStyle = "black";
+                    }
+
+                    // Enumerate through each line segment of the stroke.
+                    var first = true;
+
+                    stroke.getRenderingSegments().forEach(
+                        function (segment) {
+                            // Move to the starting screen location of the stroke.
+                            if (first) {
+                                inkContext.moveTo(segment.position.x, segment.position.y);
+                                first = false;
+                            }
+                                // Calculate the bezier curve for the segment.
+                            else {
+                                inkContext.bezierCurveTo(segment.bezierControlPoint1.x,
+                                                         segment.bezierControlPoint1.y,
+                                                         segment.bezierControlPoint2.x,
+                                                         segment.bezierControlPoint2.y,
+                                                         segment.position.x, segment.position.y);
+                            }
+                        }
+                    );
+
+                    // Draw the stroke.
+                    inkContext.stroke();
+                    inkContext.closePath();
+                }
+            );
+	    };
+
+	    // Set up the handlers for input processing.
+	    inkCanvas.addEventListener("pointerdown", onPointerDown);
+	    inkCanvas.addEventListener("pointermove", onPointerMove);
+	    inkCanvas.addEventListener("pointerup", onPointerUp);
+
+	}
     /// <summary>
     /// 初始化相機，註冊事件，取得相機鏡射、旋轉的資訊，開始預覽並對UI解鎖。
     /// </summary>
@@ -258,6 +437,7 @@
             return oMediaCapture.initializeAsync(settings);
         }).then(function () {
             isInitialized = true;
+            // set origin zoom to min zoom scale
             oMediaCapture.videoDeviceController.zoom.trySetValue(1);
             return startPreviewAsync();
         }, function (error) {
