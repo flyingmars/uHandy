@@ -32,7 +32,7 @@
     // 旋轉的原始資料，以便應用於串流(MF_MT_VIDEO_ROTATION)
     // 參考連結: http://msdn.microsoft.com/en-us/library/windows/apps/xaml/hh868174.aspx
 	var RotationKey = "C380465D-2271-428C-9B83-ECEA3B4A85C1";
-
+	var previewUrl = null;
     // Windows App 必要參數
 	var app = WinJS.Application;
 	var activation = Windows.ApplicationModel.Activation;
@@ -49,13 +49,15 @@
 			    $("#getPreviewFrameButton")
                     .mousedown(getPreviewFrameButton_clicked)
                     .mouseup(getPreviewFrameButton_tapped);
-			    $("#zoomTestButton").click(getZoomButtonClick);
 			    $("#toggleRuler")
                     .mousedown(getToggleRulerButton_clicked)
                     .mouseup(getToggleRulerButton_tapped);
 			    $("#canvasStart")
                     .mousedown(getStartCanvas_clicked)
                     .mouseup(getStartCanvas_tapped);
+			    $("#getShare")
+                    .mousedown(getShare_clicked)
+                    .mouseup(getShare_tapped);
 			    $('#cameraPreview').resize(resizeHandler);
 
                 // Preview 位址
@@ -64,7 +66,6 @@
             // 視窗事件註冊
 			oDisplayInformation.addEventListener("orientationchanged", displayInformation_orientationChanged);
 			initializeCameraAsync();
-			args.setPromise(WinJS.UI.processAll());
 
 		    // 觸控
 			document.getElementById('cameraDiv').addEventListener('click',getTouchClick,false);
@@ -74,6 +75,11 @@
 			$('#rulerInfo').draggable()  ;
 			resizeHandler();
 
+		    // 分享
+			
+
+            // Promise Process
+			args.setPromise(WinJS.UI.processAll());
 		} else {
 		    // 此應用程式已被暫停並終止。
 		    // 若要建立流暢的使用者體驗，請在此還原應用程式狀態，以便讓應用程式看起來像是從未停止執行一樣。
@@ -98,7 +104,7 @@
 	    args.setPromise(cleanupCameraAsync());
 	};
 
-    // 自己建立的函數
+    // Handler 函數
 	function resizeHandler() {
 	    // 尺規校正
 	    var zoomScale = oMediaCapture ? 500*Math.exp(-0.007* oMediaCapture.videoDeviceController.zoom.tryGetValue().value ): 500 ;
@@ -161,7 +167,6 @@
 	    elm.addEventListener("pointerdown", pointerListener);
 
 	}
-
     // 處理按鈕事件函式
 
 	function getToggleRulerButton_clicked() {
@@ -243,6 +248,25 @@
 	    $('#getPreviewFrameButton > i').css('color', 'white');
 	    getPreviewFrameAsSoftwareBitmapAsync().done();
 	    
+	}
+
+	function getShare_clicked() {
+	    $('#getShare > i').css('color', 'gray');
+	}
+	function getShare_tapped() {
+	    $('#getShare > i').css('color', 'white');
+	    WinJS.Promise.join({})
+        .then(function () {
+            $('#cameraDiv').css('padding-bottom', '0px');
+            return;
+        })
+        .then(function () {
+            Windows.ApplicationModel.DataTransfer.DataTransferManager.showShareUI();
+            return;
+        })
+        .then(function(){
+            $('#cameraDiv').css('padding-bottom', '50px');
+        }).done();
 	}
 
 	function initInkCanvas() {
@@ -399,6 +423,7 @@
 	    inkCanvas.addEventListener("pointerup", onPointerUp);
 
 	}
+
     /// <summary>
     /// 初始化相機，註冊事件，取得相機鏡射、旋轉的資訊，開始預覽並對UI解鎖。
     /// </summary>
@@ -491,7 +516,7 @@
 	        cameraPreview.style.transform = "scale(-1, 1)";
 	    }
 	    try{
-	        var previewUrl = URL.createObjectURL(oMediaCapture)
+	        previewUrl = URL.createObjectURL(oMediaCapture)
 	        previewVidTag.src = previewUrl;
 	        previewVidTag.play();
 	    
@@ -629,8 +654,7 @@
         }).then(function (outputStream) {
             return Imaging.BitmapEncoder.createAsync(Imaging.BitmapEncoder.jpegEncoderId, outputStream);
         }).then(function (encoder) {
-            // 從 SoftwareBitmap 取得資料
-            
+            // 從 SoftwareBitmap 取得資料          
             encoder.setSoftwareBitmap(bitmap);
             return encoder.flushAsync();
         }).done(function () {
