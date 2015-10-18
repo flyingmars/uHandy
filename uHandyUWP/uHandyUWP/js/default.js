@@ -63,7 +63,8 @@
                 // Preview 位址
 			    previewFrameImage.src = null;
 			}
-            // 視窗事件註冊
+
+		    // 視窗事件註冊
 			oDisplayInformation.addEventListener("orientationchanged", displayInformation_orientationChanged);
 			initializeCameraAsync();
 
@@ -100,7 +101,6 @@
 	    oDisplayInformation.removeEventListener("orientationchanged", displayInformation_orientationChanged);
 	    document.getElementById("getPreviewFrameButton").removeEventListener("click", getPreviewFrameButton_tapped);
 	    oSystemMediaControls.removeEventListener("propertychanged", systemMediaControls_PropertyChanged);
-
 	    args.setPromise(cleanupCameraAsync());
 	};
 
@@ -129,19 +129,23 @@
         };
 
         var zoomHandler = function (evt) {
-            var videoDev  = oMediaCapture.videoDeviceController;
-            var valueNow  = videoDev.zoom.tryGetValue().value;
-            var valueStep = videoDev.zoom.capabilities.step;
-            var valueMin  = videoDev.zoom.capabilities.min;
-            var valueMax = Math.min(300, videoDev.zoom.capabilities.max);
+            try{
+                var videoDev  = oMediaCapture.videoDeviceController;
+                var valueNow  = videoDev.zoom.tryGetValue().value;
+                var valueStep = videoDev.zoom.capabilities.step;
+                var valueMin  = videoDev.zoom.capabilities.min;
+                var valueMax = Math.min(300, videoDev.zoom.capabilities.max);
 
-//            console.log('evt=' + evt.scale + ' want to ' + (valueNow + valueStep));
-            if (evt.scale > 1.0 && (valueNow + valueStep*2) <= valueMax) {
-                videoDev.zoom.trySetValue(valueNow + valueStep *2);
-                console.log('set state = ' + ( valueNow + valueStep*2 ));
-            } else if (evt.scale < 1.0 && (valueNow - valueStep*2) >= valueMin) {
-                videoDev.zoom.trySetValue(valueNow - valueStep*2);
-                console.log('set state = ' + (valueNow - valueStep));
+                //            console.log('evt=' + evt.scale + ' want to ' + (valueNow + valueStep));
+                if (evt.scale > 1.0 && (valueNow + valueStep*2) <= valueMax) {
+                    videoDev.zoom.trySetValue(valueNow + valueStep *2);
+                    console.log('set state = ' + ( valueNow + valueStep*2 ));
+                } else if (evt.scale < 1.0 && (valueNow - valueStep*2) >= valueMin) {
+                    videoDev.zoom.trySetValue(valueNow - valueStep*2);
+                    console.log('set state = ' + (valueNow - valueStep));
+                }
+            } catch (e) {
+                // Handle no camera here
             }
             resizeHandler();
         }
@@ -185,7 +189,6 @@
 	        $("#canvasStart > i").css('color', 'pink');
 	    }
 	}
-
 	function getStartCanvas_tapped() {
 	    var flag = $("#canvasStart").data('myvalue');
 	    if (flag == 0) {
@@ -201,6 +204,10 @@
 	        $("#inkdraw").hide();
 	        $("#canvasStart").data('myvalue', 0);
 	    }
+	}
+
+	function getHamburger_clicked() {
+
 	}
 
 	function getTouchClick() {
@@ -239,7 +246,6 @@
 	function getPreviewFrameButton_clicked(){
 	    $('#getPreviewFrameButton > i').css('color','gray');
 	}
-
 	function getPreviewFrameButton_tapped() {
 	    // 如果沒有在 preview 中，則無法取得畫面
 	    if (!isPreviewing) {
@@ -463,7 +469,11 @@
         }).then(function () {
             isInitialized = true;
             // set origin zoom to min zoom scale
-            oMediaCapture.videoDeviceController.zoom.trySetValue(1);
+            try{
+                oMediaCapture.videoDeviceController.zoom.trySetValue(1);
+            }catch(e){
+                // Handle no camera here
+            }
             return startPreviewAsync();
         }, function (error) {
             console.log(error.message);
