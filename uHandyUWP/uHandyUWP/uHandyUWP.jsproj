@@ -108,7 +108,16 @@
     <Content Include="fonts\images\Square44x44Logo.targetsize-24_altform-unplated.png" />
     <Content Include="fonts\images\StoreLogo.png" />
     <Content Include="fonts\images\Wide310x150Logo.scale-200.png" />
-    <Content Include="images\splashscreen.png" />
+    <Content Include="images\aidmics\start_100.png" />
+    <Content Include="images\aidmics\start_125.png" />
+    <Content Include="images\aidmics\start_150.png" />
+    <Content Include="images\aidmics\start_200.png" />
+    <Content Include="images\aidmics\start_400.png" />
+    <Content Include="images\splashscreen.scale-100.png" />
+    <Content Include="images\splashscreen.scale-125.png" />
+    <Content Include="images\splashscreen.scale-150.png" />
+    <Content Include="images\splashscreen.scale-200.png" />
+    <Content Include="images\splashscreen.scale-400.png" />
     <Content Include="js\default.js" />
     <Content Include="css\default.css" />
     <Content Include="packages.config" />
