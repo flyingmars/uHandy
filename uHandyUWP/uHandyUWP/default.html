@@ -13,23 +13,24 @@
     <!-- uHandyUWP 參考 -->
     <link href="css/default.css" rel="stylesheet" />
     <link href="css/font-awesome.min.css" rel="stylesheet" />
+    <link href="css/ruler.css" rel="stylesheet" />
+    <link href="css/sidebar.css" rel="stylesheet" />
     <script src="js/default.js"></script>
     <script src="Scripts/jquery-2.1.4.js"></script>
     <script src="Scripts/jquery-ui-1.11.4.js"></script>
-
+    
 </head>
 <body class="win-type-body">
     
-    <div id="hamburger">
-        <i class="fa fa-bars fa-2x fa-align-center"></i>
-    </div>
-
-    <div style="display:none;">
+    <div id="pictureHandle" class="senerio-handlePicture" data-myvalue="0" >
+        <canvas id="inkdraw"></canvas>
         <img id="previewFrameImage" />
     </div>
 
+    <div id="pictureShow" class="senerio-pictureLibrary">
+    </div>
+
     <div id="cameraDiv">
-        <canvas id="inkdraw"></canvas>
         <div id="rulerInfo">
             <div id="ruler">
                 <div class="yokoline"></div>
@@ -44,35 +45,32 @@
         </div>
         <video id="cameraPreview" class="preview" onplay="setPreviewRotation"></video>
     </div>
+
     <div id="sideBar">
-        <div class="myicon leftBlank"></div>
-        <div class="myicon fillIn">
-            <div id="toggleRuler">
-                <i class="fa fa-arrows-h fa-2x" style="color:white"></i>
-            </div>
+        <div class="myicon" id="pictureLibrary">
+            <i class="fa fa-picture-o fa-2x senerio-preview"></i>
+            <i class="fa fa-undo fa-2x senerio-pictureLibrary"></i>
+        </div>
+        <div class="myicon"></div>
+        <div class="myicon senerio-preview" id="toggleRuler">
+            <i class="fa fa-arrows-h fa-2x"></i>
         </div>
         <div class="myicon"></div>
         <div class="myicon"></div>
-        <div class="myicon">
+        <div class="myicon senerio-preview" id="getPreviewFrameButton">
+            <i class="fa fa-camera fa-2x"></i>
         </div>
-        <div class="myicon">
-            <div id="getPreviewFrameButton">
-                <i class="fa fa-camera fa-2x" style="color:white"></i>
-            </div>
-        </div>
-        <div class="myicon">
-            <div id="canvasStart" data-myvalue="0">
-                <i class="fa fa-magic fa-2x" style="color:white"></i>
-            </div>
+        <div class="myicon senerio-handlePicture" id="canvasStart" data-myvalue="0">
+            <i class="fa fa-magic fa-2x"></i>
         </div>
         <div class="myicon"></div>
         <div class="myicon"></div>
         <div class="myicon"></div>
-        <div class="myicon">
-            <div id="getShare">
-                <i class="fa fa-share-alt fa-2x" style="color:white"></i>
-            </div>
+
+        <div class="myicon  senerio-handlePicture" id="getShare">
+            <i class="fa fa-share-alt fa-2x"></i>
         </div>
+
     </div>
 
 </body>

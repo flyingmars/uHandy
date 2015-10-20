@@ -1,0 +1,26 @@
+﻿#sideBar{
+    position:absolute;
+    background-color:black;
+    width:100%;
+    height:50px;
+    line-height:50px;
+    bottom:0px;
+}
+.myicon{
+    position:relative;
+    height:100%;
+    width:9.091%;
+    float:left;
+    text-align:center;
+}
+.myicon > i{
+    color:white;
+}
+
+.senerio-handlePicture{
+    display:none;
+}
+
+.senerio-pictureLibrary{
+    display:none;
+}

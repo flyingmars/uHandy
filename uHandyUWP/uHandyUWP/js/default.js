@@ -59,6 +59,9 @@
                     .mousedown(getShare_clicked)
                     .mouseup(getShare_tapped);
 			    $('#cameraPreview').resize(resizeHandler);
+			    $('#pictureLibrary')
+                    .mousedown(getPictureLibrary_clicked)
+                    .mouseup(getPictureLibrary_tapped);
 
                 // Preview 位址
 			    previewFrameImage.src = null;
@@ -206,10 +209,6 @@
 	    }
 	}
 
-	function getHamburger_clicked() {
-
-	}
-
 	function getTouchClick() {
 	    console.log('click By User');
 	    var touchCapabilities = new Windows.Devices.Input.TouchCapabilities();
@@ -252,8 +251,11 @@
 	        return;
 	    }
 	    $('#getPreviewFrameButton > i').css('color', 'white');
+        // 取得照片Preview及顯示/隱藏 必要的按鍵
 	    getPreviewFrameAsSoftwareBitmapAsync().done();
-	    
+	    $('.senerio-handlePicture').show();
+	    $('.senerio-preview').hide();
+	    $('.senerio-pictureLibrary').hide();
 	}
 
 	function getShare_clicked() {
@@ -274,7 +276,24 @@
             $('#cameraDiv').css('padding-bottom', '50px');
         }).done();
 	}
-
+	function getPictureLibrary_clicked() {
+	    $('#pictureLibrary > i').css('color', 'gray');
+	}
+	function getPictureLibrary_tapped() {
+	    $('#pictureLibrary > i').css('color', 'white');
+	    var flag = $("#pictureHandle").data('myvalue');
+	    if (flag == 0) {
+	        $('.senerio-handlePicture').hide();
+	        $('.senerio-preview').hide();
+	        $('.senerio-pictureLibrary').show();
+	        $("#pictureHandle").data('myvalue',1);
+	    } else {
+	        $('.senerio-handlePicture').hide();
+	        $('.senerio-preview').show();
+	        $('.senerio-pictureLibrary').hide();
+	        $("#pictureHandle").data('myvalue', 0);
+	    }
+	}
 	function initInkCanvas() {
 	    $('#inkdraw').show();
 	    var inkManager = new Windows.UI.Input.Inking.InkManager();

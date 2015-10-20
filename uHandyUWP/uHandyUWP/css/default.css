@@ -1,10 +1,6 @@
 ﻿body {
 }
 
-#hamburger{
-
-}
-
 #cameraDiv{
     position:relative;
     box-sizing: border-box;
@@ -21,27 +17,6 @@
     z-index:1;
 }
 
-#sideBar{
-    position:absolute;
-    background-color:black;
-    width:100%;
-    height:50px;
-    bottom:0px;
-}
-.myicon{
-    position:relative;
-    height:100%;
-    width:9.091%;
-    float:left;
-    text-align:center;
-}
-
-.iconCenter{
-    vertical-align:middle;
-    background-color:aliceblue;
-}
-
-
 #inkdraw {
     position:absolute;
     width:100%;
@@ -51,54 +26,28 @@
     display:none;
 }
 
-#rulerInfo{
+#pictureHandle{
+    position:relative;
+    box-sizing: border-box;
+    background-color:rgb(0, 255, 71);
+    width:100%;
+    height:100%;
+    padding-bottom:50px;
+    display:none;
+}
+
+#pictureHandle > img {
     position:absolute;
-    width: 20% ;
-    height: 50px ;
-    top: 100px;
-    left: 50px;
-    z-index:4;
+    width:100%;
+    height:auto;
 }
 
-#ruler {
-    position: relative;
-    width: 100%;
-    height: 60%;
-}
-
-.rulerNum{
-    position: relative;
-    width: 100%;
-    height: 40%;   
-}
-
-.longline {
-    position: absolute;
-    background-color: #FFFFFF;
-    width: 2px;
-    height: 100%;
-}
-
-.leftline {
-    left: 0px;
-}
-
-.rightline {
-    right: 0px;
-}
-
-.yokoline {
-    position: absolute;
-    background-color: #FFFFFF;
-    width: 100%;
-    height: 2px;
-    top: 50%;
-}
-
-.shortline {
-    position: absolute;
-    background-color: #FFFFFF;
-    width: 2px;
-    top: 20%;
-    height: 60%;
+#pictureShow{
+    position:relative;
+    box-sizing: border-box;
+    background-color:rgb(255, 106, 0);
+    width:100%;
+    height:100%;
+    padding-bottom:50px;
+    display:none;
 }
