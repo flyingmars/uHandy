@@ -196,14 +196,11 @@
 	    var flag = $("#canvasStart").data('myvalue');
 	    if (flag == 0) {
 	        $("#canvasStart > i").css('color', 'red');
-	        $("#rulerInfo").hide();
-	        $("#toggleRuler > i").hide();
 	        initInkCanvas();
 	        $("#canvasStart").data('myvalue', 1);
 	        $("#inkdraw").show();
 	    } else {
 	        $("#canvasStart > i").css('color', 'white');
-	        $("#toggleRuler > i").show();
 	        $("#inkdraw").hide();
 	        $("#canvasStart").data('myvalue', 0);
 	    }
@@ -253,9 +250,10 @@
 	    $('#getPreviewFrameButton > i').css('color', 'white');
         // 取得照片Preview及顯示/隱藏 必要的按鍵
 	    getPreviewFrameAsSoftwareBitmapAsync().done();
-	    $('.senerio-handlePicture').show();
 	    $('.senerio-preview').hide();
 	    $('.senerio-pictureLibrary').hide();
+	    $('.senerio-handlePicture').show();
+	    $('#pictureLibrary').data('myvalue', 1);
 	}
 
 	function getShare_clicked() {
@@ -281,17 +279,17 @@
 	}
 	function getPictureLibrary_tapped() {
 	    $('#pictureLibrary > i').css('color', 'white');
-	    var flag = $("#pictureHandle").data('myvalue');
+	    var flag = $("#pictureLibrary").data('myvalue');
 	    if (flag == 0) {
 	        $('.senerio-handlePicture').hide();
 	        $('.senerio-preview').hide();
 	        $('.senerio-pictureLibrary').show();
-	        $("#pictureHandle").data('myvalue',1);
-	    } else {
+	        $("#pictureLibrary").data('myvalue', 1);
+	    } else{
 	        $('.senerio-handlePicture').hide();
-	        $('.senerio-preview').show();
 	        $('.senerio-pictureLibrary').hide();
-	        $("#pictureHandle").data('myvalue', 0);
+	        $('.senerio-preview').show();
+	        $("#pictureLibrary").data('myvalue', 0)
 	    }
 	}
 	function initInkCanvas() {
@@ -674,9 +672,16 @@
     /// <param name="bitmap"></param>
     /// <returns></returns>
 	function saveAndShowSoftwareBitmapAsync(bitmap) {
-	    console.log(bitmap);
+	    var zoomScale = oMediaCapture ? 500*Math.exp(-0.007* oMediaCapture.videoDeviceController.zoom.tryGetValue().value ): 500 ;
+	    var scaleCorrect = $('#cameraPreview').css('transform').split(',')[3] || 1;
+	    var displayValue = Math.round( (zoomScale / scaleCorrect ) / 50) * 50;
 	    var oFile = null;
-	    return Windows.Storage.KnownFolders.picturesLibrary.createFileAsync("uHandy.jpg", Windows.Storage.CreationCollisionOption.generateUniqueName)
+
+	    //return Windows.Storage.KnownFolders.picturesLibrary.createFileAsync("uHandy.jpg", Windows.Storage.CreationCollisionOption.generateUniqueName)
+	    return Windows.Storage.ApplicationData.current.localFolder.createFileAsync(
+            "uHandy_R" + displayValue + "_D" + ".jpg" ,
+            Windows.Storage.CreationCollisionOption.generateUniqueName
+        )
         .then(function (file) {
             oFile = file;
             return file.openAsync(Windows.Storage.FileAccessMode.readWrite);
@@ -689,7 +694,9 @@
         }).done(function () {
             // 最後用正確的方向顯示影像
             previewFrameImage.src = oFile.path;
-            previewFrameImage.style.transform = "rotate(" + convertDisplayOrientationToDegrees(oDisplayOrientation) + "deg)";
+            console.log(oFile.path);
+            //previewFrameImage.src = oFile.path;
+            //previewFrameImage.style.transform = "rotate(" + convertDisplayOrientationToDegrees(oDisplayOrientation) + "deg)";
         });
 	}
 
@@ -768,24 +775,7 @@
         }).done();
 	}
 
-	function startRecordingAsync() {
-	    return Windows.Storage.KnownFolders.picturesLibrary.createFileAsync("SimpleVideo.mp4", Windows.Storage.CreationCollisionOption.generateUniqueName)
-        .then(function (file) {
-            // 計算旋轉角度，在必要時鏡射
-            var rotationAngle = 360 - convertDeviceOrientationToDegrees(getCameraOrientation());
-            var encodingProfile = Windows.Media.MediaProperties.MediaEncodingProfile.createMp4(Windows.Media.MediaProperties.VideoEncodingQuality.auto);
-            encodingProfile.video.properties.insert(RotationKey, rotationAngle);
-
-            console.log("Starting recording...");
-            return oMediaCapture.startRecordToStorageFileAsync(encodingProfile, file)
-            .then(function () {
-                isRecording = true;
-                console.log("Started recording!");
-            });
-        });
-	}
-
-
+	
     /// <summary>
     /// 在APP被最小化的事件中，這個方法可以處理媒體性質改變。如果APP收到一個 mute notification，則此APP就不會在前景
     /// </summary>

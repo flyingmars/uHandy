@@ -15,6 +15,7 @@
     <link href="css/font-awesome.min.css" rel="stylesheet" />
     <link href="css/ruler.css" rel="stylesheet" />
     <link href="css/sidebar.css" rel="stylesheet" />
+
     <script src="js/default.js"></script>
     <script src="Scripts/jquery-2.1.4.js"></script>
     <script src="Scripts/jquery-ui-1.11.4.js"></script>
@@ -22,15 +23,15 @@
 </head>
 <body class="win-type-body">
     
-    <div id="pictureHandle" class="senerio-handlePicture" data-myvalue="0" >
+    <div id="pictureHandle" class="senerio-handlePicture">
+        <img id="previewFrameImage" src="null" />
         <canvas id="inkdraw"></canvas>
-        <img id="previewFrameImage" />
     </div>
 
     <div id="pictureShow" class="senerio-pictureLibrary">
     </div>
 
-    <div id="cameraDiv">
+    <div id="cameraDiv" class="senerio-preview">        
         <div id="rulerInfo">
             <div id="ruler">
                 <div class="yokoline"></div>
@@ -47,9 +48,9 @@
     </div>
 
     <div id="sideBar">
-        <div class="myicon" id="pictureLibrary">
+        <div class="myicon" id="pictureLibrary"  data-myvalue="0">
             <i class="fa fa-picture-o fa-2x senerio-preview"></i>
-            <i class="fa fa-undo fa-2x senerio-pictureLibrary"></i>
+            <i class="fa fa-undo fa-2x senerio-pictureLibrary senerio-handlePicture"></i>
         </div>
         <div class="myicon"></div>
         <div class="myicon senerio-preview" id="toggleRuler">
@@ -57,7 +58,7 @@
         </div>
         <div class="myicon"></div>
         <div class="myicon"></div>
-        <div class="myicon senerio-preview" id="getPreviewFrameButton">
+        <div class="myicon senerio-preview" id="getPreviewFrameButton" >
             <i class="fa fa-camera fa-2x"></i>
         </div>
         <div class="myicon senerio-handlePicture" id="canvasStart" data-myvalue="0">
