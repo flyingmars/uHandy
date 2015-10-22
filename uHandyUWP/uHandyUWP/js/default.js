@@ -281,16 +281,40 @@
 	    $('#pictureLibrary > i').css('color', 'white');
 	    var flag = $("#pictureLibrary").data('myvalue');
 	    if (flag == 0) {
+            // 開始看圖片
 	        $('.senerio-handlePicture').hide();
 	        $('.senerio-preview').hide();
 	        $('.senerio-pictureLibrary').show();
 	        $("#pictureLibrary").data('myvalue', 1);
+	        renderPhoto();
 	    } else{
 	        $('.senerio-handlePicture').hide();
 	        $('.senerio-pictureLibrary').hide();
 	        $('.senerio-preview').show();
 	        $("#pictureLibrary").data('myvalue', 0)
 	    }
+	}
+	function renderPhoto() {
+	    var localFolder = Windows.Storage.ApplicationData.current.localFolder;
+	    //var query = localFolder.createFolderQuery(Windows.Storage.Search.CommonFolderQuery.groupByTag);
+	    localFolder.getItemsAsync().done(function (items) {
+	        items.forEach(function (item) {
+	            if (item.name.match(/uHandy_R(\d+)\.jpg/)) {
+	                var requestedSize = 200;
+	                var thumbnailMode = Windows.Storage.FileProperties.ThumbnailMode.picturesView;
+	                var thumbnailOptions = Windows.Storage.FileProperties.ThumbnailOptions.useCurrentScale;
+	                item.getThumbnailAsync(thumbnailMode, requestedSize, thumbnailOptions).done(function (thumbnail) {
+	                    if (thumbnail) {
+	                        $('#pictureShow').append(
+                                '<img src="' + URL.createObjectURL(thumbnail, { oneTimeOnly: true }) + '" />'
+                            );
+	                    } else {
+	                        WinJS.log && WinJS.log(SdkSample.errors.noThumbnail, "sample", "status");
+	                    }
+	                });
+	            }
+	        });
+	    });
 	}
 	function initInkCanvas() {
 	    $('#inkdraw').show();
