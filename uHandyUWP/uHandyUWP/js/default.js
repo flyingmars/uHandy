@@ -299,7 +299,9 @@
 	    //var query = localFolder.createFolderQuery(Windows.Storage.Search.CommonFolderQuery.groupByTag);
 	    localFolder.getItemsAsync().done(function (items) {
 	        items.forEach(function (item) {
-	            if (item.name.match(/uHandy_R(\d+)\.jpg/)) {
+	            
+	            if ( item.name.match(/uHandy_R(\d+).*\.jpg/) ) {
+	                console.log('name=' + item.name);
 	                var requestedSize = 200;
 	                var thumbnailMode = Windows.Storage.FileProperties.ThumbnailMode.picturesView;
 	                var thumbnailOptions = Windows.Storage.FileProperties.ThumbnailOptions.useCurrentScale;
