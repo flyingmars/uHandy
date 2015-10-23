@@ -44,7 +44,6 @@
 		if (args.detail.kind === activation.ActivationKind.launch) {
 			if (args.detail.previousExecutionState !== activation.ApplicationExecutionState.terminated) {
 			    // 此應用程式已全新啟動。請在這裡初始化應用程式。
-
                 // 按鈕註冊
 			    $("#getPreviewFrameButton")
                     .mousedown(getPreviewFrameButton_clicked)
@@ -287,29 +286,36 @@
 	        $('.senerio-pictureLibrary').show();
 	        $("#pictureLibrary").data('myvalue', 1);
 	        renderPhoto();
-	    } else{
+	    } else {
+	        console.log('Hello');
+	        destroyPhoto();
 	        $('.senerio-handlePicture').hide();
 	        $('.senerio-pictureLibrary').hide();
 	        $('.senerio-preview').show();
-	        $("#pictureLibrary").data('myvalue', 0)
+	        $("#pictureLibrary").data('myvalue', 0);
 	    }
 	}
 	function renderPhoto() {
 	    var localFolder = Windows.Storage.ApplicationData.current.localFolder;
 	    //var query = localFolder.createFolderQuery(Windows.Storage.Search.CommonFolderQuery.groupByTag);
 	    localFolder.getItemsAsync().done(function (items) {
-	        items.forEach(function (item) {
-	            
-	            if ( item.name.match(/uHandy_R(\d+).*\.jpg/) ) {
-	                console.log('name=' + item.name);
+	        items.forEach(function (item) {       
+	            if (item.name.match(/uHandy_R(\d+).*\.jpg/)) {
+	                var size = RegExp.$1;
 	                var requestedSize = 200;
 	                var thumbnailMode = Windows.Storage.FileProperties.ThumbnailMode.picturesView;
 	                var thumbnailOptions = Windows.Storage.FileProperties.ThumbnailOptions.useCurrentScale;
 	                item.getThumbnailAsync(thumbnailMode, requestedSize, thumbnailOptions).done(function (thumbnail) {
 	                    if (thumbnail) {
-	                        $('#pictureShow').append(
+	                        if ($('#pictureShow > .container-' + size / 50 + ' > h1' ).length  == 0) {
+	                            $('#pictureShow > .container-' + size / 50 + '').append(
+                                    '<h1>' + size + '-' + (parseInt(size) + 50) + ' ㎛' + '</h1>'
+                                )
+	                        }
+	                        $('#pictureShow > .container-' + size / 50 ).append(
                                 '<img src="' + URL.createObjectURL(thumbnail, { oneTimeOnly: true }) + '" />'
                             );
+	                        // 這邊要記得對每個圖片Bind 選取的Listener，指向編輯照片的頁面
 	                    } else {
 	                        WinJS.log && WinJS.log(SdkSample.errors.noThumbnail, "sample", "status");
 	                    }
@@ -317,6 +323,9 @@
 	            }
 	        });
 	    });
+	}
+	function destroyPhoto() {
+	    $('#pictureShow > div').html('');
 	}
 	function initInkCanvas() {
 	    $('#inkdraw').show();
