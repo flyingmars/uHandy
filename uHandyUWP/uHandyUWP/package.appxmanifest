@@ -15,10 +15,9 @@
   </Resources>
   <Applications>
     <Application Id="App" StartPage="default.html">
-      <uap:VisualElements DisplayName="uHandyUWP" Description="uHandyUWP" BackgroundColor="black" Square150x150Logo="images\Square150x150Logo.jpg" Square44x44Logo="images\Square44x44Logo.jpg">
+      <uap:VisualElements DisplayName="uHandy" Description="此應用程式需搭配 uHandy 硬體設備使用" BackgroundColor="black" Square150x150Logo="images\Square150x150Logo.jpg" Square44x44Logo="images\Square44x44Logo.jpg">
         <uap:DefaultTile Wide310x150Logo="images\Wide310x150Logo.png" Square310x310Logo="images\Square310x310Logo.jpg" Square71x71Logo="images\Square71x71Logo.jpg" ShortName="Aidmics">
           <uap:ShowNameOnTiles>
-            <uap:ShowOn Tile="square150x150Logo" />
             <uap:ShowOn Tile="square310x310Logo" />
           </uap:ShowNameOnTiles>
         </uap:DefaultTile>
