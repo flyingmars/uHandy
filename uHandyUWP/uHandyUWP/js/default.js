@@ -255,8 +255,8 @@
 	            return;
 	        }
 	        $('#getPreviewFrameButton > i').css('color', 'white');
-	        getPreviewFrameAsSoftwareBitmapAsync().then(function () {
-	            passPhotoToShow(oFile.name);
+	        getPreviewFrameAsSoftwareBitmapAsync().then(function (name) {
+	            passPhotoToShow(name);
 	        }).done();
 	    }
 	    // 取得照片Preview及顯示/隱藏 必要的按鍵
@@ -818,6 +818,7 @@
             console.log(oFile.path);
             //previewFrameImage.src = oFile.path;
             //previewFrameImage.style.transform = "rotate(" + convertDisplayOrientationToDegrees(oDisplayOrientation) + "deg)";
+            return oFile.name;
         });
 	}
 
