@@ -39,6 +39,7 @@
 
     // 觸控事件參數
 	var oGestureHandler;
+	var current_img_name;
 
 	app.onactivated = function (args) {
 		if (args.detail.kind === activation.ActivationKind.launch) {
@@ -198,10 +199,12 @@
 	        initInkCanvas();
 	        $("#canvasStart").data('myvalue', 1);
 	        $("#inkdraw").show();
+	        $('.senerio-inkMode').show();
 	    } else {
 	        $("#canvasStart > i").css('color', 'white');
 	        $("#inkdraw").hide();
 	        $("#canvasStart").data('myvalue', 0);
+	        $('.senerio-inkMode').hide();
 	    }
 	}
 
@@ -259,7 +262,13 @@
 	    // 取得照片Preview及顯示/隱藏 必要的按鍵
 	    $('.senerio-preview').hide();
 	    $('.senerio-pictureLibrary').hide();
+	    $('.senerio-inkMode').hide();
 	    $('.senerio-handlePicture').show();
+
+	    $("#canvasStart > i").css('color', 'white');
+	    $("#canvasStart").data('myvalue', 0);
+	    $('#inkdraw').hide();
+
 	    $('#pictureLibrary').data('myvalue', 1);
 	}
 
@@ -291,6 +300,7 @@
             // 開始看圖片
 	        $('.senerio-handlePicture').hide();
 	        $('.senerio-preview').hide();
+	        $('.senerio-inkMode').hide();
 	        $('.senerio-pictureLibrary').show();
 	        $("#pictureLibrary").data('myvalue', 1);
 	        renderPhoto();
@@ -298,6 +308,7 @@
 	        destroyPhoto();
 	        $('.senerio-handlePicture').hide();
 	        $('.senerio-pictureLibrary').hide();
+	        $('.senerio-inkMode').hide();
 	        $('.senerio-preview').show();
 	        $("#pictureLibrary").data('myvalue', 0);
 	    }
@@ -308,7 +319,7 @@
 	    localFolder.getItemsAsync().then(function (items) {
 	        items.forEach(function (item) {
 	            var classCount = 0;
-	            if (item.name.match(/uHandy_R(\d+).*\.jpg/)) {
+	            if (item.name.match(/uHandy_R(\d+).*\.jpg$/)) {
 	                var size = RegExp.$1;
 	                var requestedSize = 200;
 	                var thumbnailMode = Windows.Storage.FileProperties.ThumbnailMode.picturesView;
@@ -340,6 +351,8 @@
 	    $('#pictureShow > div').html('');
 	}
 	function passPhotoToShow() {
+	    current_img_name = $(this).data('name');
+
 	    var localFolder = Windows.Storage.ApplicationData.current.localFolder;
 	    localFolder.getItemAsync($(this).data('name')).then(
             function(item){
@@ -363,6 +376,52 @@
 	    var pointerDeviceType = null;
 	    var pointerId = -1;
 
+
+	    // 處理讀檔的過程
+	    var localFolder = Windows.Storage.ApplicationData.current.localFolder;
+	    var loadStream = null;
+	    localFolder.tryGetItemAsync(current_img_name + '_ink.gif').then(function (item) {
+	        if (item) {
+	            item.openAsync(Windows.Storage.FileAccessMode.read).then(function (stream) {
+	                loadStream = stream;
+	                return inkManager.loadAsync(loadStream); // since we return the promise, it will be executed before the following .done
+	            }).done(function () {
+	                // done loading, print status message
+	                var strokes = inkManager.getStrokes().length;
+	                // update the canvas, render all strokes
+	                renderAllStrokes();
+	                loadStream.close();
+	            });
+	        }
+	    });
+
+
+	    // 處理存檔的過程
+	    var saveStream = null;
+	    var getSave_clicked = function () {
+	        $("#getSave > i").css('color', 'gray');
+	    };
+	    var getSave_tapped = function () {
+	        $("#getSave > i").css('color', 'white');
+	        localFolder.tryGetItemAsync(current_img_name + '_ink.gif')
+                .then(function (item) {
+                    if (item) {
+                        return item.openAsync(Windows.Storage.FileAccessMode.readWrite);
+                    } else {
+                        return localFolder.createFileAsync(current_img_name + '_ink.gif', Windows.Storage.CreationCollisionOption.replaceExisting)
+                            .then(function (file) {
+                                return file.openAsync(Windows.Storage.FileAccessMode.readWrite);
+                            });
+                    }
+                }).then(function (stream) {
+                    saveStream = stream;
+                }).then(function () {
+
+                    return inkManager.saveAsync(saveStream);
+                }).done(function () {
+                    saveStream.close();
+                });
+	    };
 	    var getPointerDeviceType = function (pId) {    
 	        var pointerPoint = Windows.UI.Input.PointerPoint.getCurrentPoint(pId);
 	        switch (pointerPoint.pointerDevice.pointerDeviceType) {
@@ -390,7 +449,7 @@
 
 	        // Process pen and mouse (with left button) only. Reserve touch for manipulations.
 	        if ((pointerDeviceType === "Pen") || (pointerDeviceType === "Touch")  || ((pointerDeviceType === "Mouse") && (evt.button === 0))) {
-	            console.log(pointerDeviceType + " pointer down: Start stroke. ");
+	            //console.log(pointerDeviceType + " pointer down: Start stroke. ");
 
 	            // Process one pointer at a time.
 	            if (pointerId === -1) {
@@ -440,7 +499,7 @@
 	    var onPointerUp = function (evt) {
 	        // Process pen and mouse (with left button) only. Reserve touch for manipulations.
 	        if ((pointerDeviceType === "Pen") || (pointerDeviceType === "Touch") || ((pointerDeviceType === "Mouse") && (evt.button === 0))) {
-	            console.log(pointerDeviceType + " pointer up: Finish stroke. ");
+	            //console.log(pointerDeviceType + " pointer up: Finish stroke. ");
 	            if (evt.pointerId === pointerId) {
 	                // Add current pointer to the ink manager (end stroke).
 	                inkManager.processPointerUp(evt.currentPoint);
@@ -470,7 +529,7 @@
                         inkContext.strokeStyle = "green";
                     } else {
                         inkContext.lineWidth = stroke.drawingAttributes.size.width;
-                        inkContext.strokeStyle = "black";
+                        inkContext.strokeStyle = "blue";
                     }
 
                     // Enumerate through each line segment of the stroke.
@@ -505,7 +564,8 @@
 	    inkCanvas.addEventListener("pointerdown", onPointerDown);
 	    inkCanvas.addEventListener("pointermove", onPointerMove);
 	    inkCanvas.addEventListener("pointerup", onPointerUp);
-
+	    $('#getSave').mousedown(getSave_clicked);
+	    $('#getSave').mouseup(getSave_tapped);
 	}
 
     /// <summary>

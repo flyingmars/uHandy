@@ -20,10 +20,16 @@
 #inkdraw {
     position:absolute;
     width:100%;
-    height:100%;
+    height:calc(100% - 50px) ;
     z-index: 10;
-    top:-50px;
     display:none;
+}
+
+#previewFrameImage{
+    position:absolute;
+    width:100%;
+    height:auto;
+    max-height:calc(100% - 50px) ;
 }
 
 #pictureHandle{
