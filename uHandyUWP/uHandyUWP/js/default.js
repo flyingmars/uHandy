@@ -241,14 +241,22 @@
 	function getPreviewFrameButton_clicked(){
 	    $('#getPreviewFrameButton > i').css('color','gray');
 	}
-	function getPreviewFrameButton_tapped() {
-	    // 如果沒有在 preview 中，則無法取得畫面
-	    if (!isPreviewing) {
-	        return;
+	function getPreviewFrameButton_tapped(flag) {
+
+	    if (flag == 1) {
+	        // 從相簿傳過來的
+	    } else {
+            // 真的是按了照相按鈕
+	        if (!isPreviewing) {
+	            // 如果沒有在 preview 中，則無法取得畫面
+	            return;
+	        }
+	        $('#getPreviewFrameButton > i').css('color', 'white');
+	        getPreviewFrameAsSoftwareBitmapAsync().then(function () {
+	            passPhotoToShow(oFile.name);
+	        }).done();
 	    }
-	    $('#getPreviewFrameButton > i').css('color', 'white');
-        // 取得照片Preview及顯示/隱藏 必要的按鍵
-	    getPreviewFrameAsSoftwareBitmapAsync().done();
+	    // 取得照片Preview及顯示/隱藏 必要的按鍵
 	    $('.senerio-preview').hide();
 	    $('.senerio-pictureLibrary').hide();
 	    $('.senerio-handlePicture').show();
@@ -287,7 +295,6 @@
 	        $("#pictureLibrary").data('myvalue', 1);
 	        renderPhoto();
 	    } else {
-	        console.log('Hello');
 	        destroyPhoto();
 	        $('.senerio-handlePicture').hide();
 	        $('.senerio-pictureLibrary').hide();
@@ -298,8 +305,9 @@
 	function renderPhoto() {
 	    var localFolder = Windows.Storage.ApplicationData.current.localFolder;
 	    //var query = localFolder.createFolderQuery(Windows.Storage.Search.CommonFolderQuery.groupByTag);
-	    localFolder.getItemsAsync().done(function (items) {
-	        items.forEach(function (item) {       
+	    localFolder.getItemsAsync().then(function (items) {
+	        items.forEach(function (item) {
+	            var classCount = 0;
 	            if (item.name.match(/uHandy_R(\d+).*\.jpg/)) {
 	                var size = RegExp.$1;
 	                var requestedSize = 200;
@@ -312,9 +320,13 @@
                                     '<h1>' + size + '-' + (parseInt(size) + 50) + ' ㎛' + '</h1>'
                                 )
 	                        }
-	                        $('#pictureShow > .container-' + size / 50 ).append(
-                                '<img src="' + URL.createObjectURL(thumbnail, { oneTimeOnly: true }) + '" />'
+	                        $('#pictureShow > .container-' + size / 50).append(
+                                '<img class="tempcount-' + classCount + '"  src="' + URL.createObjectURL(thumbnail, { oneTimeOnly: true }) + '" data-name="' + item.name + '" />'
                             );
+	                        $('#pictureShow > .container-' + size / 50 + ' > img.tempcount-' + classCount).click(passPhotoToShow);
+
+	                        classCount++;
+
 	                        // 這邊要記得對每個圖片Bind 選取的Listener，指向編輯照片的頁面
 	                    } else {
 	                        WinJS.log && WinJS.log(SdkSample.errors.noThumbnail, "sample", "status");
@@ -322,10 +334,24 @@
 	                });
 	            }
 	        });
-	    });
+	    }).done();
 	}
 	function destroyPhoto() {
 	    $('#pictureShow > div').html('');
+	}
+	function passPhotoToShow() {
+	    var localFolder = Windows.Storage.ApplicationData.current.localFolder;
+	    localFolder.getItemAsync($(this).data('name')).then(
+            function(item){
+                previewFrameImage.src = URL.createObjectURL(item);
+            },
+            function(error){
+                console.log('error on loading file');
+            }
+	    ).done(function () {
+	        getPreviewFrameButton_tapped(1);
+	    });
+
 	}
 	function initInkCanvas() {
 	    $('#inkdraw').show();
