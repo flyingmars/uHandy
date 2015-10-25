@@ -385,13 +385,19 @@
 	            item.openAsync(Windows.Storage.FileAccessMode.read).then(function (stream) {
 	                loadStream = stream;
 	                return inkManager.loadAsync(loadStream); // since we return the promise, it will be executed before the following .done
-	            }).done(function () {
-	                // done loading, print status message
-	                var strokes = inkManager.getStrokes().length;
-	                // update the canvas, render all strokes
-	                renderAllStrokes();
-	                loadStream.close();
-	            });
+	            }).done(
+                    function () {
+                        // done loading, print status message
+                        var strokes = inkManager.getStrokes().length;
+                        // update the canvas, render all strokes
+                        renderAllStrokes();
+                        loadStream.close();
+                    }, function (e) {
+                        if (loadStream) {
+                            loadStream.close();
+                        }
+                    }
+                );
 	        }
 	    });
 
@@ -416,11 +422,17 @@
                 }).then(function (stream) {
                     saveStream = stream;
                 }).then(function () {
-
                     return inkManager.saveAsync(saveStream);
-                }).done(function () {
-                    saveStream.close();
-                });
+                }).done(
+                    function () {
+                        saveStream.close();
+                    },
+                    function (e) {
+                        if (saveStream) {
+                            saveStream.close();
+                        }
+                    }
+                );
 	    };
 	    var getPointerDeviceType = function (pId) {    
 	        var pointerPoint = Windows.UI.Input.PointerPoint.getCurrentPoint(pId);
