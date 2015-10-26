@@ -372,6 +372,7 @@
 	}
 	function initInkCanvas() {
 	    $('#inkdraw').show();
+	    var localFolder = Windows.Storage.ApplicationData.current.localFolder;
 	    var inkManager = new Windows.UI.Input.Inking.InkManager();
 	    var inkCanvas = document.getElementById("inkdraw");
 	    inkCanvas.setAttribute("width", inkCanvas.offsetWidth);
@@ -380,7 +381,14 @@
 	    var pointerDeviceType = null;
 	    var pointerId = -1;
 
-        // 繪圖作業
+	    inkManager.getStrokes().forEach(function (stroke) {
+	        console.log('remove one');
+	        stroke.selected = true;
+	    });
+	    inkManager.deleteSelected();
+	    inkContext.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
+
+	    // 繪圖作業
 	    var renderAllStrokes = function () {
 	        inkContext.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
 	        // Iterate through each stroke.
@@ -427,6 +435,7 @@
 	    var clearall = function () {
 	        try {
 	            inkManager.getStrokes().forEach(function (stroke) {
+	                console.log('remove one');
 	                stroke.selected = true;
 	            });
 	            inkManager.deleteSelected();
@@ -436,35 +445,37 @@
 	        }
 	    };
 
-	    clearall();
+	    WinJS.Promise.join({}).then(
+            clearall()
+        ).then(function () {
+            // 處理讀檔的過程
 
-	    // 處理讀檔的過程
-	    var localFolder = Windows.Storage.ApplicationData.current.localFolder;
-	    var loadStream = null;
-	    localFolder.tryGetItemAsync(current_img_name + '_ink.gif').then(function (item) {
-	        if (item) {
-	            item.openAsync(Windows.Storage.FileAccessMode.read).then(function (stream) {
-	                loadStream = stream;
-	                try {
-	                    return inkManager.loadAsync(loadStream); // since we return the promise, it will be executed before the following .done
-	                } catch (e) {
-	                    console.log(e.message);
-	                };
-	            }).done(
-                    function () {
-                        // done loading, print status message
-                        var strokes = inkManager.getStrokes().length;
-                        // update the canvas, render all strokes
-                        renderAllStrokes();
-                        loadStream.close();
-                    }, function (e) {
-                        if (loadStream) {
+            var loadStream = null;
+            localFolder.tryGetItemAsync(current_img_name + '_ink.gif').then(function (item) {
+                if (item) {
+                    item.openAsync(Windows.Storage.FileAccessMode.read).then(function (stream) {
+                        loadStream = stream;
+                        try {
+                            return inkManager.loadAsync(loadStream); // since we return the promise, it will be executed before the following .done
+                        } catch (e) {
+                            console.log(e.message);
+                        };
+                    }).done(
+                        function () {
+                            // done loading, print status message
+                            var strokes = inkManager.getStrokes().length;
+                            // update the canvas, render all strokes
+                            renderAllStrokes();
                             loadStream.close();
+                        }, function (e) {
+                            if (loadStream) {
+                                loadStream.close();
+                            }
                         }
-                    }
-                );
-	        }
-	    });
+                    );
+                }
+            })
+        }).done();
 
 
 	    // 處理存檔的過程
