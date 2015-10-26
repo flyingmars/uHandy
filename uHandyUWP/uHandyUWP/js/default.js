@@ -40,6 +40,7 @@
     // 觸控事件參數
 	var oGestureHandler;
 	var current_img_name;
+	var takePhotoFlag;
 
 	app.onactivated = function (args) {
 		if (args.detail.kind === activation.ActivationKind.launch) {
@@ -351,8 +352,11 @@
 	    $('#pictureShow > div').html('');
 	}
 	function passPhotoToShow() {
-	    current_img_name = $(this).data('name');
-
+	    if (takePhotoFlag == 1) {
+	        takePhotoFlag = 0;
+	    } else {
+	        current_img_name = $(this).data('name');
+	    }
 	    var localFolder = Windows.Storage.ApplicationData.current.localFolder;
 	    localFolder.getItemAsync($(this).data('name')).then(
             function(item){
@@ -375,6 +379,7 @@
 	    var inkContext = inkCanvas.getContext("2d");
 	    var pointerDeviceType = null;
 	    var pointerId = -1;
+
 
 
 	    // 處理讀檔的過程
@@ -400,6 +405,7 @@
                         if (loadStream) {
                             loadStream.close();
                         }
+                        renderAllStrokes();
                     }
                 );
 	        }
@@ -601,12 +607,15 @@
 	    };
         
 	    var clearall = function () {
-	        inkManager.getStrokes().forEach(function (stroke) {
-	            stroke.selected = true;
-	        });
-            inkManager.deleteSelected();
-            renderAllStrokes();
-
+	        try{
+	            inkManager.getStrokes().forEach(function (stroke) {
+	                stroke.selected = true;
+	            });
+	            inkManager.deleteSelected();
+	            renderAllStrokes();
+	        } catch (e) {
+	            console.log(e.message);
+	        }
 	    };
 
 	    // Set up the handlers for input processing.
@@ -857,6 +866,8 @@
         )
         .then(function (file) {
             oFile = file;
+            current_img_name = file.name;
+            takePhotoFlag = 1; 
             return file.openAsync(Windows.Storage.FileAccessMode.readWrite);
         }).then(function (outputStream) {
             return Imaging.BitmapEncoder.createAsync(Imaging.BitmapEncoder.jpegEncoderId, outputStream);
