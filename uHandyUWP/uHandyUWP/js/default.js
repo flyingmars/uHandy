@@ -422,7 +422,11 @@
                 }).then(function (stream) {
                     saveStream = stream;
                 }).then(function () {
-                    return inkManager.saveAsync(saveStream);
+                    try{
+                        return inkManager.saveAsync(saveStream);
+                    } catch (e) {
+                        console.log(e.message);
+                    }
                 }).done(
                     function () {
                         saveStream.close();
