@@ -405,7 +405,6 @@
                         if (loadStream) {
                             loadStream.close();
                         }
-                        renderAllStrokes();
                     }
                 );
 	        }
