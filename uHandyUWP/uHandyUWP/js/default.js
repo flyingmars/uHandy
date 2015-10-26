@@ -384,7 +384,11 @@
 	        if (item) {
 	            item.openAsync(Windows.Storage.FileAccessMode.read).then(function (stream) {
 	                loadStream = stream;
-	                return inkManager.loadAsync(loadStream); // since we return the promise, it will be executed before the following .done
+	                try {
+	                    return inkManager.loadAsync(loadStream); // since we return the promise, it will be executed before the following .done
+	                } catch (e) {
+	                    console.log(e.message);
+	                };
 	            }).done(
                     function () {
                         // done loading, print status message
@@ -404,6 +408,13 @@
 
 	    // 處理存檔的過程
 	    var saveStream = null;
+	    var deleteInk_clicked = function () {
+	        $("#deleteInk > i").css('color', 'gray');
+	    };
+	    var deleteInk_tapped = function () {
+	        $("#deleteInk > i").css('color', 'white');
+	        clearall();
+	    };
 	    var getSave_clicked = function () {
 	        $("#getSave > i").css('color', 'gray');
 	    };
@@ -411,8 +422,15 @@
 	        $("#getSave > i").css('color', 'white');
 	        localFolder.tryGetItemAsync(current_img_name + '_ink.gif')
                 .then(function (item) {
-                    if (item) {
-                        return item.openAsync(Windows.Storage.FileAccessMode.readWrite);
+                    if (inkManager.getStrokes().length > 0) {
+                        if (item) {
+                            return item.openAsync(Windows.Storage.FileAccessMode.readWrite);
+                        } else {
+                            return localFolder.createFileAsync(current_img_name + '_ink.gif', Windows.Storage.CreationCollisionOption.replaceExisting)
+                                .then(function (file) {
+                                    return file.openAsync(Windows.Storage.FileAccessMode.readWrite);
+                                });
+                        }
                     } else {
                         return localFolder.createFileAsync(current_img_name + '_ink.gif', Windows.Storage.CreationCollisionOption.replaceExisting)
                             .then(function (file) {
@@ -422,8 +440,10 @@
                 }).then(function (stream) {
                     saveStream = stream;
                 }).then(function () {
-                    try{
-                        return inkManager.saveAsync(saveStream);
+                    try {
+                        if (inkManager.getStrokes().length > 0) {
+                            return inkManager.saveAsync(saveStream);
+                        }
                     } catch (e) {
                         console.log(e.message);
                     }
@@ -459,64 +479,64 @@
 	    };
 
 	    var onPointerDown = function (evt) {
+	        var current = evt.currentPoint;
 
 	        // Get the device type for the pointer input.
 	        pointerDeviceType = getPointerDeviceType(evt.pointerId);
 
-	        // Process pen and mouse (with left button) only. Reserve touch for manipulations.
-	        if ((pointerDeviceType === "Pen") || (pointerDeviceType === "Touch")  || ((pointerDeviceType === "Mouse") && (evt.button === 0))) {
-	            //console.log(pointerDeviceType + " pointer down: Start stroke. ");
 
-	            // Process one pointer at a time.
-	            if (pointerId === -1) {
-	                var current = evt.currentPoint;
+	        // Process one pointer at a time.
+	        if (pointerId === -1) {
+	            // Process pen and mouse (with left button) only. Reserve touch for manipulations.
+	            if ((pointerDeviceType === "Pen" && (!current.properties.isEraser)) || (pointerDeviceType === "Touch") || ((pointerDeviceType === "Mouse") && (evt.button === 0))) {
 
 	                // Start drawing the stroke.
 	                inkContext.beginPath();
 	                inkContext.lineWidth = '1';
-	                inkContext.strokeStyle = 'blue';
+	                inkContext.strokeStyle = 'red';
 	                inkContext.lineCap = "round";
 	                inkContext.lineJoin = "round";
-	                inkContext.moveTo( current.rawPosition.x, current.rawPosition.y);
+	                inkContext.moveTo(current.rawPosition.x, current.rawPosition.y);
+	                inkManager.mode = Windows.UI.Input.Inking.InkManipulationMode.inking;
 
-	                // Add current pointer to the ink manager (begin stroke).
-	                inkManager.processPointerDown(current);
-
-	                // The pointer id is used to restrict input processing to the current stroke.
-	                pointerId = evt.pointerId;
+	            } else if ((evt.pointerType === "pen") && (current.properties.isEraser)) {
+	                inkContext.strokeStyle = "rgba(255,255,255,0.0)";
+	                inkManager.mode = Windows.UI.Input.Inking.InkManipulationMode.erasing;
 	            }
-	        }
-	        else {
-	            // Process touch input.
+
+	            // Add current pointer to the ink manager (begin stroke).
+	            inkManager.processPointerDown(current);
+
+	            // The pointer id is used to restrict input processing to the current stroke.
+	            pointerId = evt.pointerId;
 	        }
 	    };
 
 	    var onPointerMove = function (evt) {
-	        // Process pen and mouse (with left button) only. Reserve touch for manipulations.
-	        if ((pointerDeviceType === "Pen") || (pointerDeviceType === "Touch") || ((pointerDeviceType === "Mouse") && (evt.button === -1))) {
+	        if (evt.pointerId === pointerId) {
+	            var current = evt.currentPoint;
+	            var update = inkManager.processPointerUpdate(current);
 
-	            // The pointer Id is used to restrict input processing to the current stroke.
-	            // pointerId is updated in onPointerDown().
-	            if (evt.pointerId === pointerId) {
-	                var current = evt.currentPoint;
-	                // Draw stroke in real time.
+	            if (inkManager.mode === Windows.UI.Input.Inking.InkManipulationMode.erasing) {
+	                // if the dirty rect is not empty then some strokes have been erased and we need to update the render.
+	                if (update.height > 0 || update.width > 0) {
+	                    console.log(update.height + ' ' + update.width);
+	                    renderAllStrokes();
+	                }
+	            } else {
+	                // live rendering is done here
 	                inkContext.lineTo(current.rawPosition.x, current.rawPosition.y);
 	                inkContext.stroke();
-
-	                // Add current pointer to the ink manager (update stroke).
-	                inkManager.processPointerUpdate(current);
 	            }
-	        }
-	        else {
-	            // Process touch input.
 	        }
 	    };
 
 	    var onPointerUp = function (evt) {
-	        // Process pen and mouse (with left button) only. Reserve touch for manipulations.
-	        if ((pointerDeviceType === "Pen") || (pointerDeviceType === "Touch") || ((pointerDeviceType === "Mouse") && (evt.button === 0))) {
-	            //console.log(pointerDeviceType + " pointer up: Finish stroke. ");
-	            if (evt.pointerId === pointerId) {
+	        if (evt.pointerId === pointerId) {
+	            // Process pen and mouse (with left button) only. Reserve touch for manipulations.
+	            if ((pointerDeviceType === "Pen") || (pointerDeviceType === "Touch") || ((pointerDeviceType === "Mouse") && (evt.button === 0))) {
+	                //console.log(pointerDeviceType + " pointer up: Finish stroke. ");
+
 	                // Add current pointer to the ink manager (end stroke).
 	                inkManager.processPointerUp(evt.currentPoint);
 
@@ -524,18 +544,22 @@
 	                inkContext.closePath();
 
 	                // Render strokes using bezier curves.
-	                //renderAllStrokes();
+	                renderAllStrokes();
 
-	                // Reset pointer Id.
-	                pointerId = -1;
+	              
 	            }
-	        }
-	        else {
-	            // Process touch input.
+	            else {
+	                // Process touch input.
+	            }
+
+	            // Reset pointer Id.
+	            pointerId = -1;
+
 	        }
 	    };
 
 	    var renderAllStrokes = function () {
+	        inkContext.clearRect(0, 0, inkCanvas.width, inkCanvas.height); 
 	        // Iterate through each stroke.
 	        inkManager.getStrokes().forEach(
                 function (stroke) {
@@ -545,7 +569,7 @@
                         inkContext.strokeStyle = "green";
                     } else {
                         inkContext.lineWidth = stroke.drawingAttributes.size.width;
-                        inkContext.strokeStyle = "blue";
+                        inkContext.strokeStyle = "red";
                     }
 
                     // Enumerate through each line segment of the stroke.
@@ -575,6 +599,15 @@
                 }
             );
 	    };
+        
+	    var clearall = function () {
+	        inkManager.getStrokes().forEach(function (stroke) {
+	            stroke.selected = true;
+	        });
+            inkManager.deleteSelected();
+            renderAllStrokes();
+
+	    };
 
 	    // Set up the handlers for input processing.
 	    inkCanvas.addEventListener("pointerdown", onPointerDown);
@@ -582,6 +615,9 @@
 	    inkCanvas.addEventListener("pointerup", onPointerUp);
 	    $('#getSave').mousedown(getSave_clicked);
 	    $('#getSave').mouseup(getSave_tapped);
+	    $('#deleteInk').mousedown(deleteInk_clicked);
+	    $('#deleteInk').mouseup(deleteInk_tapped);
+
 	}
 
     /// <summary>
