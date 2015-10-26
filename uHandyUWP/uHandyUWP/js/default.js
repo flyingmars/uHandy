@@ -380,7 +380,63 @@
 	    var pointerDeviceType = null;
 	    var pointerId = -1;
 
+        // 繪圖作業
+	    var renderAllStrokes = function () {
+	        inkContext.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
+	        // Iterate through each stroke.
+	        inkManager.getStrokes().forEach(
+                function (stroke) {
+                    inkContext.beginPath();
+                    if (stroke.selected) {
+                        inkContext.lineWidth = stroke.drawingAttributes.size.width * 2;
+                        inkContext.strokeStyle = "green";
+                    } else {
+                        inkContext.lineWidth = stroke.drawingAttributes.size.width;
+                        inkContext.strokeStyle = "red";
+                    }
 
+                    // Enumerate through each line segment of the stroke.
+                    var first = true;
+
+                    stroke.getRenderingSegments().forEach(
+                        function (segment) {
+                            // Move to the starting screen location of the stroke.
+                            if (first) {
+                                inkContext.moveTo(segment.position.x, segment.position.y);
+                                first = false;
+                            }
+                                // Calculate the bezier curve for the segment.
+                            else {
+                                inkContext.bezierCurveTo(segment.bezierControlPoint1.x,
+                                                         segment.bezierControlPoint1.y,
+                                                         segment.bezierControlPoint2.x,
+                                                         segment.bezierControlPoint2.y,
+                                                         segment.position.x, segment.position.y);
+                            }
+                        }
+                    );
+
+                    // Draw the stroke.
+                    inkContext.stroke();
+                    inkContext.closePath();
+                }
+            );
+	    };
+
+	    // 清空作業
+	    var clearall = function () {
+	        try {
+	            inkManager.getStrokes().forEach(function (stroke) {
+	                stroke.selected = true;
+	            });
+	            inkManager.deleteSelected();
+	            renderAllStrokes();
+	        } catch (e) {
+	            console.log(e.message);
+	        }
+	    };
+
+	    clearall();
 
 	    // 處理讀檔的過程
 	    var localFolder = Windows.Storage.ApplicationData.current.localFolder;
@@ -563,59 +619,9 @@
 	        }
 	    };
 
-	    var renderAllStrokes = function () {
-	        inkContext.clearRect(0, 0, inkCanvas.width, inkCanvas.height); 
-	        // Iterate through each stroke.
-	        inkManager.getStrokes().forEach(
-                function (stroke) {
-                    inkContext.beginPath();
-                    if (stroke.selected) {
-                        inkContext.lineWidth = stroke.drawingAttributes.size.width * 2;
-                        inkContext.strokeStyle = "green";
-                    } else {
-                        inkContext.lineWidth = stroke.drawingAttributes.size.width;
-                        inkContext.strokeStyle = "red";
-                    }
 
-                    // Enumerate through each line segment of the stroke.
-                    var first = true;
-
-                    stroke.getRenderingSegments().forEach(
-                        function (segment) {
-                            // Move to the starting screen location of the stroke.
-                            if (first) {
-                                inkContext.moveTo(segment.position.x, segment.position.y);
-                                first = false;
-                            }
-                                // Calculate the bezier curve for the segment.
-                            else {
-                                inkContext.bezierCurveTo(segment.bezierControlPoint1.x,
-                                                         segment.bezierControlPoint1.y,
-                                                         segment.bezierControlPoint2.x,
-                                                         segment.bezierControlPoint2.y,
-                                                         segment.position.x, segment.position.y);
-                            }
-                        }
-                    );
-
-                    // Draw the stroke.
-                    inkContext.stroke();
-                    inkContext.closePath();
-                }
-            );
-	    };
         
-	    var clearall = function () {
-	        try{
-	            inkManager.getStrokes().forEach(function (stroke) {
-	                stroke.selected = true;
-	            });
-	            inkManager.deleteSelected();
-	            renderAllStrokes();
-	        } catch (e) {
-	            console.log(e.message);
-	        }
-	    };
+
 
 	    // Set up the handlers for input processing.
 	    inkCanvas.addEventListener("pointerdown", onPointerDown);
