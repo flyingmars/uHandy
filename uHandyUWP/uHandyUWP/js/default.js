@@ -317,36 +317,45 @@
 	function renderPhoto() {
 	    var localFolder = Windows.Storage.ApplicationData.current.localFolder;
 	    //var query = localFolder.createFolderQuery(Windows.Storage.Search.CommonFolderQuery.groupByTag);
-	    localFolder.getItemsAsync().then(function (items) {
-	        items.forEach(function (item) {
-	            var classCount = 0;
-	            if (item.name.match(/uHandy_R(\d+).*\.jpg$/)) {
-	                var size = RegExp.$1;
-	                var requestedSize = 200;
-	                var thumbnailMode = Windows.Storage.FileProperties.ThumbnailMode.picturesView;
-	                var thumbnailOptions = Windows.Storage.FileProperties.ThumbnailOptions.useCurrentScale;
-	                item.getThumbnailAsync(thumbnailMode, requestedSize, thumbnailOptions).done(function (thumbnail) {
-	                    if (thumbnail) {
-	                        if ($('#pictureShow > .container-' + size / 50 + ' > h1' ).length  == 0) {
-	                            $('#pictureShow > .container-' + size / 50 + '').append(
-                                    '<h1>' + size + '-' + (parseInt(size) + 50) + ' ㎛' + '</h1>'
-                                )
+	    try {
+	        localFolder.getItemsAsync().then(function (items) {
+	            items.forEach(function (item) {
+	                var classCount = 0;
+	                if (item.name.match(/uHandy_R(\d+).*\.jpg$/)) {
+	                    var size = RegExp.$1;
+	                    var requestedSize = 200;
+	                    var thumbnailMode = Windows.Storage.FileProperties.ThumbnailMode.picturesView;
+	                    var thumbnailOptions = Windows.Storage.FileProperties.ThumbnailOptions.useCurrentScale;
+	                    var zoom_min = (parseInt(47000 / (parseInt(size) + parseInt(50)) / 10) * 10);
+	                    var zoom_max = (parseInt(47000 / parseInt(size) / 10) * 10 > 700) ? 700 : (parseInt(47000 / parseInt(size) / 10) * 10);
+	                    item.getThumbnailAsync(thumbnailMode, requestedSize, thumbnailOptions).done(function (thumbnail) {
+	                        if (thumbnail) {
+	                            if ($('#pictureShow > .container-' + size / 50 + ' > h1').length == 0) {
+	                                $('#pictureShow > .container-' + size / 50 + '').append(
+                                        '<h1>' + zoom_min + '-' + zoom_max + ' x' + '</h1>'
+                                    )
+	                            }
+	                            $('#pictureShow > .container-' + size / 50).append(
+                                    '<img class="tempcount-' + classCount + '"  src="' + URL.createObjectURL(thumbnail, { oneTimeOnly: true }) + '" data-name="' + item.name + '" />'
+                                );
+	                            $('#pictureShow > .container-' + size / 50 + ' > img.tempcount-' + classCount).click(passPhotoToShow);
+
+	                            classCount++;
+
+	                            // 這邊要記得對每個圖片Bind 選取的Listener，指向編輯照片的頁面
+	                        } else {
+	                            WinJS.log && WinJS.log(SdkSample.errors.noThumbnail, "sample", "status");
 	                        }
-	                        $('#pictureShow > .container-' + size / 50).append(
-                                '<img class="tempcount-' + classCount + '"  src="' + URL.createObjectURL(thumbnail, { oneTimeOnly: true }) + '" data-name="' + item.name + '" />'
-                            );
-	                        $('#pictureShow > .container-' + size / 50 + ' > img.tempcount-' + classCount).click(passPhotoToShow);
+	                    },function (err) {
+	                        console.log(err.message);
+                        });
+	                }
+	            });
 
-	                        classCount++;
-
-	                        // 這邊要記得對每個圖片Bind 選取的Listener，指向編輯照片的頁面
-	                    } else {
-	                        WinJS.log && WinJS.log(SdkSample.errors.noThumbnail, "sample", "status");
-	                    }
-	                });
-	            }
-	        });
-	    }).done();
+	        }).done();
+	    } catch (e) {
+	        console.log(e);
+	    }
 	}
 	function destroyPhoto() {
 	    $('#pictureShow > div').html('');

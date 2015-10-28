@@ -2,7 +2,7 @@
     position:absolute;
     width: 20% ;
     height: 50px ;
-    top: 100px;
+    bottom: 100px ;
     left: 50px;
     z-index:4;
 }
