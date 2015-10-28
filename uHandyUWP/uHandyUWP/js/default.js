@@ -390,6 +390,7 @@
 	    var pointerDeviceType = null;
 	    var pointerId = -1;
 
+	    deleteInk_tapped();
 	    inkManager.getStrokes().forEach(function (stroke) {
 	        console.log('remove one');
 	        stroke.selected = true;
@@ -398,7 +399,7 @@
 	    inkContext.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
 
 	    // 繪圖作業
-	    var renderAllStrokes = function () {
+	    function renderAllStrokes() {
 	        inkContext.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
 	        // Iterate through each stroke.
 	        inkManager.getStrokes().forEach(
@@ -438,10 +439,10 @@
                     inkContext.closePath();
                 }
             );
-	    };
+	    }
 
 	    // 清空作業
-	    var clearall = function () {
+	    function clearall() {
 	        try {
 	            inkManager.getStrokes().forEach(function (stroke) {
 	                console.log('remove one');
@@ -452,7 +453,7 @@
 	        } catch (e) {
 	            console.log(e.message);
 	        }
-	    };
+	    }
 
 	    WinJS.Promise.join({}).then(
             clearall()
@@ -489,17 +490,17 @@
 
 	    // 處理存檔的過程
 	    var saveStream = null;
-	    var deleteInk_clicked = function () {
+	    function deleteInk_clicked() {
 	        $("#deleteInk > i").css('color', 'gray');
-	    };
-	    var deleteInk_tapped = function () {
+	    }
+	    function deleteInk_tapped() {
 	        $("#deleteInk > i").css('color', 'white');
 	        clearall();
-	    };
-	    var getSave_clicked = function () {
+	    }
+	    function getSave_clicked() {
 	        $("#getSave > i").css('color', 'gray');
-	    };
-	    var getSave_tapped = function () {
+	    }
+	    function getSave_tapped() {
 	        $("#getSave > i").css('color', 'white');
 	        localFolder.tryGetItemAsync(current_img_name + '_ink.gif')
                 .then(function (item) {
@@ -538,8 +539,8 @@
                         }
                     }
                 );
-	    };
-	    var getPointerDeviceType = function (pId) {    
+	    }
+	    function getPointerDeviceType(pId) {    
 	        var pointerPoint = Windows.UI.Input.PointerPoint.getCurrentPoint(pId);
 	        switch (pointerPoint.pointerDevice.pointerDeviceType) {
 	            case Windows.Devices.Input.PointerDeviceType.touch:
@@ -557,9 +558,9 @@
 	                pointerDeviceType = "Undefined";
 	        }
 	        return pointerDeviceType;
-	    };
+	    }
 
-	    var onPointerDown = function (evt) {
+	    function onPointerDown(evt) {
 	        var current = evt.currentPoint;
 
 	        // Get the device type for the pointer input.
@@ -591,9 +592,9 @@
 	            // The pointer id is used to restrict input processing to the current stroke.
 	            pointerId = evt.pointerId;
 	        }
-	    };
+	    }
 
-	    var onPointerMove = function (evt) {
+	    function onPointerMove(evt) {
 	        if (evt.pointerId === pointerId) {
 	            var current = evt.currentPoint;
 	            var update = inkManager.processPointerUpdate(current);
@@ -610,9 +611,9 @@
 	                inkContext.stroke();
 	            }
 	        }
-	    };
+	    }
 
-	    var onPointerUp = function (evt) {
+	    function onPointerUp(evt) {
 	        if (evt.pointerId === pointerId) {
 	            // Process pen and mouse (with left button) only. Reserve touch for manipulations.
 	            if ((pointerDeviceType === "Pen") || (pointerDeviceType === "Touch") || ((pointerDeviceType === "Mouse") && (evt.button === 0))) {
@@ -637,7 +638,7 @@
 	            pointerId = -1;
 
 	        }
-	    };
+	    }
 
 
         
