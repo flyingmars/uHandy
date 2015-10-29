@@ -111,14 +111,14 @@
     // Handler 函數
 	function resizeHandler() {
 	    // 尺規校正
-	    var zoomScale = oMediaCapture ? 500*Math.exp(-0.007* oMediaCapture.videoDeviceController.zoom.tryGetValue().value ): 500 ;
+	    var zoomTestValue = oMediaCapture ? oMediaCapture.videoDeviceController.zoom.tryGetValue().value : 0 ;
+	    var zoomScale = oMediaCapture ? 650 - 13.504 * zoomTestValue + 0.0679*zoomTestValue*zoomTestValue : 650 ;
 	    var scaleCorrect = $('#cameraPreview').css('transform').split(',')[3] || 1;
 	    var originRatio = 100;
 	    var displayWidth = document.getElementById('cameraPreview').clientWidth;
 	    var rulerWidth = document.getElementById('rulerInfo').clientWidth;
 	    var displayValue = Math.round((zoomScale / scaleCorrect) / 10) * 10;
-	    var zoomTestValue = oMediaCapture?  oMediaCapture.videoDeviceController.zoom.tryGetValue().value : 0;
-	    $('#rulerInfo > .rulerNum').html(displayValue + ' ㎛');
+	    $('#rulerInfo > .rulerNum').html(displayValue + ' ㎛' );
 	    //console.log('resize = ' + zoomScale);
 	}
 
@@ -139,7 +139,7 @@
                 var valueNow  = videoDev.zoom.tryGetValue().value;
                 var valueStep = videoDev.zoom.capabilities.step;
                 var valueMin  = videoDev.zoom.capabilities.min;
-                var valueMax = Math.min(300, videoDev.zoom.capabilities.max);
+                var valueMax = Math.min(61, videoDev.zoom.capabilities.max);
 
                 //            console.log('evt=' + evt.scale + ' want to ' + (valueNow + valueStep));
                 if (evt.scale > 1.0 && (valueNow + valueStep*1) <= valueMax) {
@@ -327,14 +327,20 @@
 	                    var requestedSize = 200;
 	                    var thumbnailMode = Windows.Storage.FileProperties.ThumbnailMode.picturesView;
 	                    var thumbnailOptions = Windows.Storage.FileProperties.ThumbnailOptions.useCurrentScale;
-	                    var zoom_min = (parseInt(47000 / (parseInt(size) + parseInt(50)) / 10) * 10);
-	                    var zoom_max = (parseInt(47000 / parseInt(size) / 10) * 10 > 700) ? 700 : (parseInt(47000 / parseInt(size) / 10) * 10);
+	                    var zoom_min = (parseInt(50000 / (parseInt(size) + parseInt(50)) / 10) * 10);
+	                    var zoom_max = (parseInt(50000 / parseInt(size) / 10) * 10 > 650) ? 650 : (parseInt(50000 / parseInt(size) / 10) * 10);
 	                    item.getThumbnailAsync(thumbnailMode, requestedSize, thumbnailOptions).done(function (thumbnail) {
 	                        if (thumbnail) {
 	                            if ($('#pictureShow > .container-' + size / 50 + ' > h1').length == 0) {
-	                                $('#pictureShow > .container-' + size / 50 + '').append(
-                                        '<h1>' + zoom_min + '-' + zoom_max + ' x' + '</h1>'
-                                    )
+	                                if (zoom_max == zoom_min) {
+	                                    $('#pictureShow > .container-' + size / 50 + '').append(
+                                            '<h1>' + ' < ' + zoom_max + ' x' + '</h1>'
+                                        );
+	                                } else {
+	                                    $('#pictureShow > .container-' + size / 50 + '').append(
+                                            '<h1>' + zoom_min + ' - ' + zoom_max + ' x' + '</h1>'
+                                        );
+	                                }
 	                            }
 	                            $('#pictureShow > .container-' + size / 50).append(
                                     '<img class="tempcount-' + classCount + '"  src="' + URL.createObjectURL(thumbnail, { oneTimeOnly: true }) + '" data-name="' + item.name + '" />'
@@ -696,7 +702,7 @@
             isInitialized = true;
             // set origin zoom to min zoom scale
             try{
-                oMediaCapture.videoDeviceController.zoom.trySetValue(1);
+                oMediaCapture.videoDeviceController.zoom.trySetValue(0);
             }catch(e){
                 // Handle no camera here
             }
@@ -881,7 +887,8 @@
     /// <param name="bitmap"></param>
     /// <returns></returns>
 	function saveAndShowSoftwareBitmapAsync(bitmap) {
-	    var zoomScale = oMediaCapture ? 500*Math.exp(-0.007* oMediaCapture.videoDeviceController.zoom.tryGetValue().value ): 500 ;
+	    var zoomTestValue = oMediaCapture ? oMediaCapture.videoDeviceController.zoom.tryGetValue().value : 0 ;
+	    var zoomScale = oMediaCapture ?  650 - 13.504 * zoomTestValue + 0.0679*zoomTestValue*zoomTestValue : 650 ;
 	    var scaleCorrect = $('#cameraPreview').css('transform').split(',')[3] || 1;
 	    var displayValue = Math.round( (zoomScale / scaleCorrect ) / 50) * 50;
 	    var oFile = null;
