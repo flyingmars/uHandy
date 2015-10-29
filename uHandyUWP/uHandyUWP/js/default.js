@@ -116,7 +116,8 @@
 	    var originRatio = 100;
 	    var displayWidth = document.getElementById('cameraPreview').clientWidth;
 	    var rulerWidth = document.getElementById('rulerInfo').clientWidth;
-	    var displayValue = Math.round( (zoomScale / scaleCorrect ) / 10) * 10;
+	    var displayValue = Math.round((zoomScale / scaleCorrect) / 10) * 10;
+	    var zoomTestValue = oMediaCapture?  oMediaCapture.videoDeviceController.zoom.tryGetValue().value : 0;
 	    $('#rulerInfo > .rulerNum').html(displayValue + ' ㎛');
 	    //console.log('resize = ' + zoomScale);
 	}
@@ -141,11 +142,11 @@
                 var valueMax = Math.min(300, videoDev.zoom.capabilities.max);
 
                 //            console.log('evt=' + evt.scale + ' want to ' + (valueNow + valueStep));
-                if (evt.scale > 1.0 && (valueNow + valueStep*2) <= valueMax) {
-                    videoDev.zoom.trySetValue(valueNow + valueStep *2);
-                    console.log('set state = ' + ( valueNow + valueStep*2 ));
-                } else if (evt.scale < 1.0 && (valueNow - valueStep*2) >= valueMin) {
-                    videoDev.zoom.trySetValue(valueNow - valueStep*2);
+                if (evt.scale > 1.0 && (valueNow + valueStep*1) <= valueMax) {
+                    videoDev.zoom.trySetValue(valueNow + valueStep *1);
+                    console.log('set state = ' + ( valueNow + valueStep*1 ));
+                } else if (evt.scale < 1.0 && (valueNow - valueStep*1) >= valueMin) {
+                    videoDev.zoom.trySetValue(valueNow - valueStep*1);
                     console.log('set state = ' + (valueNow - valueStep));
                 }
             } catch (e) {
