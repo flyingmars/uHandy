@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
-  <Identity Name="3d11543e-f19e-4c40-806b-ea79bbce8072" Version="0.0.10.0" Publisher="CN=Aidmics" />
+  <Identity Name="uHandy.uHandy" Version="1.1.4.0" Publisher="CN=1538DBB3-9915-4AC7-9461-6531C3A7F482" />
   <mp:PhoneIdentity PhoneProductId="3d11543e-f19e-4c40-806b-ea79bbce8072" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
-    <DisplayName>uHandyUWP</DisplayName>
-    <PublisherDisplayName>Aidmics</PublisherDisplayName>
+    <DisplayName>uHandy</DisplayName>
+    <PublisherDisplayName>uHandy</PublisherDisplayName>
     <Logo>images\StoreLogo.jpg</Logo>
   </Properties>
   <Dependencies>
@@ -15,13 +15,14 @@
   </Resources>
   <Applications>
     <Application Id="App" StartPage="default.html">
-      <uap:VisualElements DisplayName="uHandy" Description="此應用程式需搭配 uHandy 硬體設備使用" BackgroundColor="black" Square150x150Logo="images\Square150x150Logo.jpg" Square44x44Logo="images\Square44x44Logo.jpg">
-        <uap:DefaultTile Wide310x150Logo="images\Wide310x150Logo.png" Square310x310Logo="images\Square310x310Logo.jpg" Square71x71Logo="images\Square71x71Logo.jpg" ShortName="Aidmics">
+      <uap:VisualElements DisplayName="uHandy" Description="此應用程式需搭配 uHandy 硬體設備使用" BackgroundColor="#4AB3B0" Square150x150Logo="images\Square150x150Logo.jpg" Square44x44Logo="images\Square44x44Logo.jpg">
+        <uap:LockScreen Notification="badgeAndTileText" BadgeLogo="images\BadgeLogo.png" />
+        <uap:DefaultTile Wide310x150Logo="images\Wide310x150Logo.png" Square310x310Logo="images\Square310x310Logo.jpg" Square71x71Logo="images\Square71x71Logo.jpg" ShortName="uHandy">
           <uap:ShowNameOnTiles>
             <uap:ShowOn Tile="square310x310Logo" />
           </uap:ShowNameOnTiles>
         </uap:DefaultTile>
-        <uap:SplashScreen Image="images\splashscreen.png" BackgroundColor="#000000" />
+        <uap:SplashScreen Image="images\splashscreen.png" BackgroundColor="#4AB3B0" />
         <uap:InitialRotationPreference>
           <uap:Rotation Preference="landscape" />
         </uap:InitialRotationPreference>
