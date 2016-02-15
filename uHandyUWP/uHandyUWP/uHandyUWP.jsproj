@@ -68,6 +68,11 @@
     <Content Include="Content\themes\base\base.css" />
     <Content Include="Content\themes\base\button.css" />
     <Content Include="Content\themes\base\core.css" />
+    <Content Include="Content\themes\base\css\default.css" />
+    <Content Include="Content\themes\base\css\font-awesome.css" />
+    <Content Include="Content\themes\base\css\font-awesome.min.css" />
+    <Content Include="Content\themes\base\css\ruler.css" />
+    <Content Include="Content\themes\base\css\sidebar.css" />
     <Content Include="Content\themes\base\datepicker.css" />
     <Content Include="Content\themes\base\dialog.css" />
     <Content Include="Content\themes\base\draggable.css" />
@@ -95,10 +100,6 @@
     <Content Include="Content\themes\base\tabs.css" />
     <Content Include="Content\themes\base\theme.css" />
     <Content Include="Content\themes\base\tooltip.css" />
-    <Content Include="css\font-awesome.css" />
-    <Content Include="css\font-awesome.min.css" />
-    <Content Include="css\ruler.css" />
-    <Content Include="css\sidebar.css" />
     <Content Include="default.html" />
     <Content Include="fonts\fontawesome-webfont.eot" />
     <Content Include="fonts\fontawesome-webfont.svg" />
@@ -159,7 +160,6 @@
     <Content Include="images\Wide310x150Logo.scale-400.png" />
     <Content Include="js\buttonHandle.js" />
     <Content Include="js\default.js" />
-    <Content Include="css\default.css" />
     <None Include="Package.StoreAssociation.xml" />
     <Content Include="packages.config" />
     <Content Include="Scripts\jquery-2.1.4.intellisense.js" />
