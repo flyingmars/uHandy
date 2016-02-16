@@ -17,12 +17,13 @@
     <Application Id="App" StartPage="default.html">
       <uap:VisualElements DisplayName="uHandy" Description="此應用程式需搭配 uHandy 硬體設備使用" BackgroundColor="#4AB3B0" Square150x150Logo="images\Square150x150Logo.jpg" Square44x44Logo="images\Square44x44Logo.jpg">
         <uap:LockScreen Notification="badgeAndTileText" BadgeLogo="images\BadgeLogo.png" />
-        <uap:DefaultTile Wide310x150Logo="images\Wide310x150Logo.png" Square310x310Logo="images\Square310x310Logo.jpg" Square71x71Logo="images\Square71x71Logo.jpg" ShortName="uHandy">
+        <uap:DefaultTile Wide310x150Logo="images\WideLogo.png" Square310x310Logo="images\Square310x310Logo.jpg" Square71x71Logo="images\Square71x71Logo.jpg" ShortName="uHandy">
           <uap:ShowNameOnTiles>
+            <uap:ShowOn Tile="wide310x150Logo" />
             <uap:ShowOn Tile="square310x310Logo" />
           </uap:ShowNameOnTiles>
         </uap:DefaultTile>
-        <uap:SplashScreen Image="images\splashscreen.png" BackgroundColor="#4AB3B0" />
+        <uap:SplashScreen Image="images\openDisplay.png" BackgroundColor="#4AB3B0" />
         <uap:InitialRotationPreference>
           <uap:Rotation Preference="landscape" />
         </uap:InitialRotationPreference>
