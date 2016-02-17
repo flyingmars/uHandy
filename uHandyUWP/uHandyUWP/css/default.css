@@ -1,0 +1,71 @@
+﻿body {
+}
+
+#cameraDiv{
+    position:relative;
+    box-sizing: border-box;
+    background-color:black;
+    width:100%;
+    height:100%;
+    padding-bottom:50px;
+}
+
+#cameraPreview {
+    width:100%;
+    height:auto;
+    outline:hidden;
+    z-index:1;
+}
+
+#inkdraw {
+    position:absolute;
+    width:100%;
+    height:calc(100% - 50px) ;
+    z-index: 10;
+    display:none;
+}
+
+#previewFrameImage{
+    position:absolute;
+    width:100%;
+    height:auto;
+    max-height:calc(100% - 50px) ;
+}
+
+#pictureHandle{
+    position:relative;
+    box-sizing: border-box;
+    background-color:rgb(0, 0, 0);
+    width:100%;
+    height:100%;
+    padding-bottom:50px;
+    display:none;
+}
+
+#pictureHandle > img {
+    position:absolute;
+    width:100%;
+    height:auto;
+}
+
+#pictureShow{
+    position:relative;
+    background-color:rgb(0, 0, 0);
+    width:100%;
+    height:calc(100% - 50px) ;
+    padding-left:10px;
+    display:none;
+    overflow-y:auto;
+}
+
+#pictureShow > div {
+    width:100%;
+    height:auto;
+}
+
+#pictureShow > div > img{
+    box-sizing: border-box;
+    padding:10px 5px;
+    width:25.0%;
+    height:auto;
+}

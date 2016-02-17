@@ -1,0 +1,51 @@
+﻿#rulerInfo{
+    position:absolute;
+    width: 20% ;
+    height: 50px ;
+    bottom: 100px ;
+    left: 50px;
+    z-index:4;
+}
+
+#ruler {
+    position: relative;
+    width: 100%;
+    height: 60%;
+}
+
+.rulerNum{
+    position: relative;
+    width: 100%;
+    height: 40%;   
+}
+
+.longline {
+    position: absolute;
+    background-color: #FFFFFF;
+    width: 2px;
+    height: 100%;
+}
+
+.leftline {
+    left: 0px;
+}
+
+.rightline {
+    right: 0px;
+}
+
+.yokoline {
+    position: absolute;
+    background-color: #FFFFFF;
+    width: 100%;
+    height: 2px;
+    top: 50%;
+}
+
+.shortline {
+    position: absolute;
+    background-color: #FFFFFF;
+    width: 2px;
+    top: 20%;
+    height: 60%;
+}
